@@ -67,7 +67,7 @@ void CI_Update(const uint8_t *old_hash, const uint8_t old_garlic,
 void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
 	       const uint8_t *salt,  const uint8_t saltlen,
 	       const uint8_t *data,  const uint32_t datalen,
-	       const uint8_t garlic, const uint32_t keylen,
+	       const uint8_t garlic, uint32_t keylen,
 	       const uint8_t key_id, uint8_t *key);
 
 
