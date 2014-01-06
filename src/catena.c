@@ -8,6 +8,14 @@
 
 #include "catena.h"
 
+#ifdef ARC_BIG_ENDIAN
+  #define TO_LITTLE_ENDIAN_64(n) bswap_64(n)
+  #define TO_LITTLE_ENDIAN_32(n) bswap_32(n)
+#else
+  #define TO_LITTLE_ENDIAN_64(n) (n)
+  #define TO_LITTLE_ENDIAN_32(n) (n)
+#endif
+
 uint64_t reverse(uint64_t x, const uint8_t n)
 {
   unsigned int i;
@@ -97,15 +105,20 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
   __Hash3(&garlic,1, (uint8_t *) &i, 8, x, H_LEN, v);
 
   /* Top row */
-  for(i=1 ; i<c ; i++)
-    __Hash3(&garlic,1, (uint8_t *) &i, 8, &v[(i-1)*H_LEN],H_LEN,&v[i*H_LEN]);
+  for(i=1 ; i<c ; i++) {
+    uint64_t tmp = TO_LITTLE_ENDIAN_64(i);
+    __Hash3(&garlic,1, (uint8_t *) &tmp, 8, &v[(i-1)*H_LEN],H_LEN,&v[i*H_LEN]);
+  }
 
   /* Mid rows */
   for(k=0; k< LAMBDA; k++) {
-    __Hash4(&garlic,1, (uint8_t *) &i, 8, v, H_LEN, &v[(c-1)*H_LEN], H_LEN, r);
-    for(i=1 ; i<c ; i++)
-      __Hash4(&garlic,1, (uint8_t *) &i, 8, &r[(i-1)*H_LEN], H_LEN,
+    uint64_t tmp = TO_LITTLE_ENDIAN_64(c);
+    __Hash4(&garlic,1, (uint8_t *) &tmp, 8, v, H_LEN, &v[(c-1)*H_LEN], H_LEN, r);
+    for(i=1 ; i<c ; i++) {
+      tmp = TO_LITTLE_ENDIAN_64(i);
+      __Hash4(&garlic,1, (uint8_t *) &tmp, 8, &r[(i-1)*H_LEN], H_LEN,
 	      &v[reverse(i,garlic)*H_LEN] , H_LEN, &r[i*H_LEN]);
+    }
     memcpy(v,r,c*H_LEN);
   }
   memcpy(h, r, H_LEN);
@@ -155,7 +168,7 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 	  return 0;
 	}
 
-      invokation_counter = ((uint64_t) LAMBDA+1) << c;
+      invokation_counter = TO_LITTLE_ENDIAN_64(((uint64_t) LAMBDA+1) << c);
       __Hash3( (uint8_t *) &c,1, (uint8_t *) &invokation_counter,8, x,H_LEN, x);
       memset(x+hashlen, 0, H_LEN-hashlen);
     }
@@ -206,7 +219,7 @@ int Catena_Client(const uint8_t  *pwd,   const uint32_t pwdlen,
 int Catena_Server(const uint8_t garlic, const uint8_t x[H_LEN],
 		  const uint8_t hashlen, uint8_t *hash)
 {
-  const uint64_t invokation_counter = ((uint64_t) LAMBDA+1) << garlic;
+  const uint64_t invokation_counter = TO_LITTLE_ENDIAN_64(((uint64_t) LAMBDA+1) << garlic);
   uint8_t z[H_LEN];
 
   if (hashlen > H_LEN) return -1;
@@ -233,7 +246,7 @@ void CI_Update(const uint8_t *old_hash, const uint8_t old_garlic,
   for(c=old_garlic+1; c <= new_garlic; c++)
     {
       LBRH(x, c, x);
-      invokation_counter = ((uint64_t) LAMBDA+1) << c;
+      invokation_counter = TO_LITTLE_ENDIAN_64(((uint64_t) LAMBDA+1) << c);
       __Hash3(&c, 1, (uint8_t *) &invokation_counter,8,  x, H_LEN, x);
       memset(x+hashlen, 0, H_LEN-hashlen);
     }
@@ -246,7 +259,7 @@ void CI_Update(const uint8_t *old_hash, const uint8_t old_garlic,
 void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
 	       const uint8_t *salt,  const uint8_t saltlen,
 	       const uint8_t *data,  const uint32_t datalen,
-	       const uint8_t garlic, const uint32_t keylen,
+	       const uint8_t garlic, uint32_t keylen,
 	       const uint8_t key_id, uint8_t *key)
 {
   uint8_t hash[H_LEN];
@@ -254,17 +267,21 @@ void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
   const uint32_t len = keylen/H_LEN;
   const uint32_t rest = keylen%H_LEN;
   uint64_t i;
+  keylen = TO_LITTLE_ENDIAN_32(keylen);
 
   __Catena(pwd, pwdlen, salt, saltlen, data, datalen,
 	   garlic, H_LEN, REGULAR, KEY_DERIVATION_MODE, hash);
 
-  for(i=0; i < len; i++)
-    __Hash5(&zero, 1, (uint8_t *) &i, 8, &key_id, 1,(uint8_t *) &keylen,4,
+  for(i=0; i < len; i++) {
+    uint64_t tmp = TO_LITTLE_ENDIAN_64(i);
+    __Hash5(&zero, 1, (uint8_t *) &tmp, 8, &key_id, 1,(uint8_t *) &keylen,4,
 	      hash, H_LEN, &key[i*H_LEN]);
+  }
 
   if(rest)
     {
-      __Hash5(&zero, 1, (uint8_t *) &i, 8, &key_id, 1,(uint8_t *) &keylen,4,
+      uint64_t tmp = TO_LITTLE_ENDIAN_64(i);
+      __Hash5(&zero, 1, (uint8_t *) &tmp, 8, &key_id, 1,(uint8_t *) &keylen,4,
 		hash, H_LEN, hash);
       memcpy(&key[len*H_LEN], hash,rest);
     }
