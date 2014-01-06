@@ -3,6 +3,7 @@
 #include <byteswap.h>
 #include <stdlib.h>
 #include <sys/param.h>
+#define __STDC_CONSTANT_MACROS
 #include <stdint.h>
 
 #include "catena.h"
@@ -10,7 +11,7 @@
 uint64_t reverse(uint64_t x, const uint8_t n)
 {
   unsigned int i;
-  unsigned int r=0;
+  uint64_t r = 0;
   for(i=0;i<n;i++)
     {
       r<<=1;
@@ -87,7 +88,7 @@ inline void __Hash5(const uint8_t *i1, const uint8_t i1len,
 
 void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
 {
-  const uint64_t c=1<<garlic;
+  const uint64_t c = UINT64_C(1) << garlic;
   uint8_t *v = malloc(c*H_LEN);
   uint8_t *r = malloc(c*H_LEN);
   uint64_t i=0;
@@ -128,7 +129,7 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
  uint64_t invokation_counter;
  uint8_t c;
 
-  if ((hashlen > H_LEN) || (garlic == 255)) return -1;
+  if ((hashlen > H_LEN) || (garlic > 63)) return -1;
 
   /* Compute Tweak */
   t[0] = 0xFF;
@@ -154,7 +155,7 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 	  return 0;
 	}
 
-      invokation_counter = (LAMBDA+1)*(1<<c);
+      invokation_counter = ((uint64_t) LAMBDA+1) << c;
       __Hash3( (uint8_t *) &c,1, (uint8_t *) &invokation_counter,8, x,H_LEN, x);
       memset(x+hashlen, 0, H_LEN-hashlen);
     }
@@ -205,7 +206,7 @@ int Catena_Client(const uint8_t  *pwd,   const uint32_t pwdlen,
 int Catena_Server(const uint8_t garlic, const uint8_t x[H_LEN],
 		  const uint8_t hashlen, uint8_t *hash)
 {
-  const uint64_t invokation_counter =  (LAMBDA+1)*(1<<garlic);
+  const uint64_t invokation_counter = ((uint64_t) LAMBDA+1) << garlic;
   uint8_t z[H_LEN];
 
   if (hashlen > H_LEN) return -1;
@@ -232,7 +233,7 @@ void CI_Update(const uint8_t *old_hash, const uint8_t old_garlic,
   for(c=old_garlic+1; c <= new_garlic; c++)
     {
       LBRH(x, c, x);
-      invokation_counter = (LAMBDA+1)*(1<<c);
+      invokation_counter = ((uint64_t) LAMBDA+1) << c;
       __Hash3(&c, 1, (uint8_t *) &invokation_counter,8,  x, H_LEN, x);
       memset(x+hashlen, 0, H_LEN-hashlen);
     }
