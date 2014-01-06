@@ -1,4 +1,4 @@
-#ifndef _CATENA_h_
+#ifndef _CATENA_H_
 #define _CATENA_H_
 
 #include <stdint.h>
