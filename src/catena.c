@@ -18,15 +18,14 @@
 
 uint64_t reverse(uint64_t x, const uint8_t n)
 {
-  unsigned int i;
-  uint64_t r = 0;
-  for(i=0;i<n;i++)
-    {
-      r<<=1;
-      r|=x&1;
-      x>>=1;
-    }
-  return r;
+  x = bswap_64(x);
+  x = ((x & UINT64_C(0x0f0f0f0f0f0f0f0f)) << 4) |
+    ((x & UINT64_C(0xf0f0f0f0f0f0f0f0)) >> 4);
+  x = ((x & UINT64_C(0x3333333333333333)) << 2) |
+    ((x & UINT64_C(0xcccccccccccccccc)) >> 2);
+  x = ((x & UINT64_C(0x5555555555555555)) << 1) |
+    ((x & UINT64_C(0xaaaaaaaaaaaaaaaa)) >> 1);
+  return x >> (64 - n);
 }
 
 /***************************************************/
