@@ -107,7 +107,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
 	      &v[reverse(i,garlic)*H_LEN] , H_LEN, &r[i*H_LEN]);
     memcpy(v,r,c*H_LEN);
   }
-  memcpy(h, r, H_LEN);
+  memcpy(h, r + (c - 1) * H_LEN, H_LEN);
   free(v);
   free(r);
 }
