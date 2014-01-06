@@ -96,32 +96,48 @@ inline void __Hash5(const uint8_t *i1, const uint8_t i1len,
 void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
 {
   const uint64_t c = UINT64_C(1) << garlic;
-  uint8_t *v = malloc(c*H_LEN);
   uint8_t *r = malloc(c*H_LEN);
-  uint64_t i=0;
+  uint64_t i = 0;
   uint32_t k;
 
-  __Hash3(&garlic,1, (uint8_t *) &i, 8, x, H_LEN, v);
+  __Hash3(&garlic, 1, (uint8_t*) &i, 8, x, H_LEN, r);
 
   /* Top row */
-  for(i=1 ; i<c ; i++) {
+  for (i = 1; i < c; i++) {
     uint64_t tmp = TO_LITTLE_ENDIAN_64(i);
-    __Hash3(&garlic,1, (uint8_t *) &tmp, 8, &v[(i-1)*H_LEN],H_LEN,&v[i*H_LEN]);
+    __Hash3(&garlic, 1, (uint8_t*) &tmp, 8, r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
   }
 
   /* Mid rows */
-  for(k=0; k< LAMBDA; k++) {
-    uint64_t tmp = TO_LITTLE_ENDIAN_64(c);
-    __Hash4(&garlic,1, (uint8_t *) &tmp, 8, v, H_LEN, &v[(c-1)*H_LEN], H_LEN, r);
-    for(i=1 ; i<c ; i++) {
+  for (k = 0; k < LAMBDA; k++) {
+    i = 0;
+    __Hash4(&garlic, 1, (uint8_t*) &i, 8, r, H_LEN, r + (c-1)*H_LEN, H_LEN, r);
+
+    /* Replace r[reverse(i, garlic)] with new value */
+    uint8_t *previousR = r, *p;
+    for (i = 1; i < c; i++) {
+      p = r + reverse(i, garlic) * H_LEN;
       tmp = TO_LITTLE_ENDIAN_64(i);
-      __Hash4(&garlic,1, (uint8_t *) &tmp, 8, &r[(i-1)*H_LEN], H_LEN,
-	      &v[reverse(i,garlic)*H_LEN] , H_LEN, &r[i*H_LEN]);
+      __Hash4(&garlic, 1, (uint8_t*) &tmp, 8, previousR, H_LEN, p, H_LEN, p);
+      previousR = p;
     }
-    memcpy(v,r,c*H_LEN);
+    k++;
+    if (k >= LAMBDA) {
+      break;
+    }
+
+    /* This is now sequential because (reverse(reverse(i, garlic), garlic) == i) */
+    i = 0;
+    __Hash4(&garlic, 1, (uint8_t*) &i, 8, r, H_LEN, r + (c-1)*H_LEN, H_LEN, r);
+    p = r + H_LEN;
+    for (i = 1; i < c; i++, p += H_LEN) {
+      tmp = TO_LITTLE_ENDIAN_64(i);
+      __Hash4(&garlic, 1, (uint8_t*) &tmp, 8, p - H_LEN, H_LEN, p, H_LEN, p);
+    }
   }
+
+  /* reverse(c - 1, garlic) == c - 1 */
   memcpy(h, r + (c - 1) * H_LEN, H_LEN);
-  free(v);
   free(r);
 }
 
