@@ -98,13 +98,14 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
   const uint64_t c = UINT64_C(1) << garlic;
   uint8_t *r = malloc(c*H_LEN);
   uint64_t i = 0;
+  uint64_t tmp;
   uint32_t k;
 
   __Hash3(&garlic, 1, (uint8_t*) &i, 8, x, H_LEN, r);
 
   /* Top row */
   for (i = 1; i < c; i++) {
-    uint64_t tmp = TO_LITTLE_ENDIAN_64(i);
+    tmp = TO_LITTLE_ENDIAN_64(i);
     __Hash3(&garlic, 1, (uint8_t*) &tmp, 8, r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
   }
 
