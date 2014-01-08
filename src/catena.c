@@ -100,6 +100,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
   uint64_t i = 0;
   uint64_t tmp;
   uint32_t k;
+  uint64_t invokation_counter = c;
 
   __Hash3(&garlic, 1, (uint8_t*) &i, 8, x, H_LEN, r);
 
@@ -111,14 +112,14 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
 
   /* Mid rows */
   for (k = 0; k < LAMBDA; k++) {
-    i = 0;
-    __Hash4(&garlic, 1, (uint8_t*) &i, 8, r, H_LEN, r + (c-1)*H_LEN, H_LEN, r);
+    tmp = TO_LITTLE_ENDIAN_64(invokation_counter++);
+    __Hash4(&garlic, 1, (uint8_t*) &tmp, 8, r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
 
     /* Replace r[reverse(i, garlic)] with new value */
     uint8_t *previousR = r, *p;
     for (i = 1; i < c; i++) {
       p = r + reverse(i, garlic) * H_LEN;
-      tmp = TO_LITTLE_ENDIAN_64(i);
+      tmp = TO_LITTLE_ENDIAN_64( invokation_counter++);
       __Hash4(&garlic, 1, (uint8_t*) &tmp, 8, previousR, H_LEN, p, H_LEN, p);
       previousR = p;
     }
@@ -126,13 +127,12 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
     if (k >= LAMBDA) {
       break;
     }
-
     /* This is now sequential because (reverse(reverse(i, garlic), garlic) == i) */
-    i = 0;
-    __Hash4(&garlic, 1, (uint8_t*) &i, 8, r, H_LEN, r + (c-1)*H_LEN, H_LEN, r);
+    tmp = TO_LITTLE_ENDIAN_64( invokation_counter++);
+    __Hash4(&garlic, 1, (uint8_t*) &tmp, 8, r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
     p = r + H_LEN;
     for (i = 1; i < c; i++, p += H_LEN) {
-      tmp = TO_LITTLE_ENDIAN_64(i);
+    tmp = TO_LITTLE_ENDIAN_64(invokation_counter++);
       __Hash4(&garlic, 1, (uint8_t*) &tmp, 8, p - H_LEN, H_LEN, p, H_LEN, p);
     }
   }
