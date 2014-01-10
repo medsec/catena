@@ -1,4 +1,4 @@
-catena
+Catena
 ======
 Catena is a memory-consuming password scrambler that excellently
 thwarts massively parallel attacks on cheap memory-constrained
@@ -11,6 +11,6 @@ http://eprint.iacr.org/2013/525
 
 Content
 -------
-C reference implementation of Catena-blake2b 
-C reference implementation of Catena-sha512 (depends on libssl and libcrypto) 
+* C reference implementation of Catena-blake2b 
+* C reference implementation of Catena-sha512 (depends on libssl and libcrypto) 
 
