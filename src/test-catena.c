@@ -34,13 +34,11 @@ int main()
   uint8_t key2[H_LEN/4];
   uint8_t key3[3*H_LEN+10];
 
-
   memset(hash1,0,H_LEN);
   memset(hash2,0,H_LEN);
   memset(hash3,0,H_LEN);
   memset(hash4,0,H_LEN);
   memset(x,0,H_LEN);
-
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
 	 (uint8_t *) data, strlen(data), garlic, hashlen, hash1);

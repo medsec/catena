@@ -2,8 +2,7 @@
 #define _CATENA_H_
 
 #include <stdint.h>
-
-#include "blake2.h"
+#include <string.h>
 
 #define H_LEN      64
 #define LAMBDA      3
