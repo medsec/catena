@@ -12,4 +12,5 @@ http://eprint.iacr.org/2013/525
 Content
 -------
 C reference implementation of Catena-blake2b 
+C reference implementation of Catena-sha512 (depends on libssl and libcrypto) 
 
