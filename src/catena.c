@@ -32,16 +32,6 @@ uint64_t reverse(uint64_t x, const uint8_t n)
 }
 
 
-inline void __Hash3(const uint8_t *i1, const uint8_t i1len,
-		    const uint8_t *i2, const uint8_t i2len,
-		    const uint8_t *i3, const uint8_t i3len,
-		    uint8_t hash[H_LEN]);
-
-
-
-/***************************************************/
-
-
 void LBRH(const uint8_t x[H_LEN], const uint8_t garlic, uint8_t h[H_LEN])
 {
   const uint64_t c = UINT64_C(1) << garlic;

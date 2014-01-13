@@ -1,14 +1,16 @@
 CC=gcc
 HDIR=./blake2
-CFLAGS=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -s -m64 -W -Wall  -L$(HDIR) -I$(HDIR)
+CFLAGS=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -s -m64 -msse4.2 -W -Wall  -L$(HDIR) -I$(HDIR)
 
 HASH=$(HDIR)/blake2b.c
 
 all: blake2b sha512
 
-blake2b: catena-blake2b-test catena-blake2b-test_vectors
+blake2b: catena-blake2b-test catena-blake2b-test_vectors catena-blake2b-opt-test
 sha512: catena-sha512-test catena-sha512-test_vectors
 
+catena-blake2b-opt-test:
+	$(CC) $(CFLAGS) -o $@ test-catena.c catena_opt_blake2b.c catena-blake2b.c $(HASH)
 
 catena-blake2b-test:
 	$(CC) $(CFLAGS) -o $@ test-catena.c catena.c catena-blake2b.c $(HASH)
@@ -30,4 +32,4 @@ catena:
 
 
 clean:
-	rm -f  *~ *.o catena-blake2b-test catena-blake2b-test_vectors catena-sha512-test catena-sha512-test_vectors 
+	rm -f  *~ *.o catena-blake2b-test catena-blake2b-test_vectors catena-sha512-test catena-sha512-test_vectors catena-blake2b-opt-test

@@ -21,10 +21,11 @@ int main()
      0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0XFF};
   const char *password = "Password";
   const char *data     = "I'm a header";
-  const uint8_t garlic = 16;
-  const uint8_t garlic_old = 10;
+  const uint8_t garlic = 18;
 
   uint8_t hash1[H_LEN];
+
+#ifdef CATENA_INFO
   uint8_t hash2[H_LEN];
   uint8_t hash3[H_LEN];
   uint8_t hash4[H_LEN];
@@ -33,26 +34,27 @@ int main()
   uint8_t key1[H_LEN];
   uint8_t key2[H_LEN/4];
   uint8_t key3[3*H_LEN+10];
-
-  memset(hash1,0,H_LEN);
   memset(hash2,0,H_LEN);
   memset(hash3,0,H_LEN);
   memset(hash4,0,H_LEN);
   memset(x,0,H_LEN);
+#endif
+
+  memset(hash1,0,H_LEN);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
 	 (uint8_t *) data, strlen(data), garlic, hashlen, hash1);
   print_hex(hash1, hashlen);
 
-
+#ifdef CATENA_INFO
   Catena_Client((uint8_t *) password, strlen(password), salt, SALT_LEN,
 		(uint8_t *) data, strlen(data), garlic, hashlen, x);
   Catena_Server(garlic, x, hashlen, hash2);
   print_hex(hash2, hashlen);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	 (uint8_t *) data, strlen(data), garlic_old, hashlen, x);
-  CI_Update(x, garlic_old, garlic, hashlen, hash3);
+	 (uint8_t *) data, strlen(data), garlic, hashlen, x);
+  CI_Update(x, garlic, garlic+1, hashlen, hash3);
   print_hex(hash3, hashlen);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
@@ -80,6 +82,8 @@ int main()
   Catena_KG((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
 	    (uint8_t *) data, strlen(data), garlic,3*H_LEN+10 , 3,  key3);
   print_hex(key3, 3*H_LEN+10);
+
+#endif
 
   return 0;
 }
