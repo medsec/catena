@@ -67,9 +67,8 @@ int Catena_Client(const uint8_t *pwd,   const uint32_t pwdlen,
  *  output of Catena_Client(...) as input
  *  Returns -1 if an an error occurred, otherwise 0.
  */
-int Catena_Server(const uint8_t lambda, const uint8_t garlic,
-		  const uint8_t x[H_LEN], const uint8_t hashlen,
-		  uint8_t *hash);
+int Catena_Server(const uint8_t garlic, const uint8_t x[H_LEN],
+		  const uint8_t hashlen, uint8_t *hash);
 
 /* Client independent update form an old hash */
 void CI_Update(const uint8_t *old_hash,  const uint8_t lambda,

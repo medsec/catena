@@ -58,7 +58,7 @@ int main()
   Catena_Client((uint8_t *) password, strlen(password), salt, SALT_LEN,
 		(uint8_t *) data, strlen(data), lambda, min_garlic, garlic,
 		hashlen, x);
-  Catena_Server(lambda, garlic, x, hashlen, hash2);
+  Catena_Server(garlic, x, hashlen, hash2);
   print_hex(hash2, hashlen);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
@@ -68,7 +68,7 @@ int main()
   print_hex(hash3, hashlen);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	 (uint8_t *) "", 0, lambda, min_garlic, garlic, hashlen, hash1);
+	 (uint8_t *) "", 0, lambda, garlic, garlic, hashlen, hash1);
   print_hex(hash1, hashlen);
 
 

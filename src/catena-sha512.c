@@ -16,6 +16,21 @@ inline void __Hash1(const uint8_t *input, const uint8_t inputlen,
 
 /***************************************************/
 
+inline void __Hash2(const uint8_t *i1, const uint8_t i1len,
+		    const uint8_t *i2, const uint8_t i2len,
+		    uint8_t hash[H_LEN])
+{
+  SHA512_CTX ctx;
+  SHA512_Init(&ctx);
+  SHA512_Update(&ctx, i1, i1len);
+  SHA512_Update(&ctx, i2, i2len);
+  SHA512_Final(hash, &ctx);
+}
+
+
+
+/***************************************************/
+
 inline void __Hash3(const uint8_t *i1, const uint8_t i1len,
 		    const uint8_t *i2, const uint8_t i2len,
 		    const uint8_t *i3, const uint8_t i3len,
