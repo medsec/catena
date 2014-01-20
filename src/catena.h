@@ -5,14 +5,19 @@
 #include <string.h>
 
 #define H_LEN      64
+#define KEY_LEN    16
 #define LAMBDA      3
-
 #define REGULAR 0
 #define CLIENT 1
+
+
 
 /* Modes */
 #define PASSWORD_HASHING_MODE 0
 #define KEY_DERIVATION_MODE   1
+
+
+
 
 /* The default unit for all length values are bytes */
 
@@ -49,7 +54,7 @@ int Catena_Client(const uint8_t  *pwd,   const uint32_t pwdlen,
 		  const uint8_t  garlic, const uint8_t  hashlen,
 		  uint8_t x[H_LEN]);
 
-/*  Computes the final step of the passwrd hashing process. Requieres the
+/*  Computes the final step of the password hashing process. Requieres the
  *  output of Catena_Client(...) as input
  *  Returns -1 if an an error occurred, otherwise 0.
  */
@@ -68,6 +73,16 @@ void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
 	       const uint8_t *data,  const uint32_t datalen,
 	       const uint8_t garlic, uint32_t keylen,
 	       const uint8_t key_id, uint8_t *key);
+
+
+/* Encrypts the password hash with H(key || uuid || key) where
+   key denots a KEY_LEN-byte key and uuid denots a *UNIQUE* user ID */
+void Catena_Keyed_Hashing(const uint8_t *pwd,   const uint32_t pwdlen,
+			  const uint8_t *salt,  const uint8_t  saltlen,
+			  const uint8_t *data,  const uint32_t datalen,
+			  const uint8_t garlic, const uint8_t  hashlen,
+			  const uint8_t *key,   const uint64_t uuid,
+			  uint8_t *chash);
 
 
 /* Returns -1 if an an error occurred, otherwise 0. */

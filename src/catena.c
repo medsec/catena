@@ -244,6 +244,27 @@ void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
 
 
 /***************************************************/
+
+void Catena_Keyed_Hashing(const uint8_t *pwd,   const uint32_t pwdlen,
+			  const uint8_t *salt,  const uint8_t saltlen,
+			  const uint8_t *data,  const uint32_t datalen,
+			  const uint8_t garlic, const uint8_t  hashlen,
+			  const uint8_t *key,   const uint64_t uuid,
+			  uint8_t *chash)
+{
+  uint8_t keystream[H_LEN];
+  uint64_t tmp = TO_LITTLE_ENDIAN_64(uuid);
+  int i;
+
+   __Catena(pwd, pwdlen, salt, saltlen, data, datalen, garlic, hashlen,
+	    REGULAR, PASSWORD_HASHING_MODE, chash);
+
+   __Hash3(key, KEY_LEN,  (uint8_t*) &tmp, 8, key, KEY_LEN, keystream);
+
+   for(i=0; i<hashlen; i++) chash[i] ^= keystream[i];
+}
+
+/***************************************************/
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int PHS(void *out, size_t outlen,  const void *in, size_t inlen,
 	const void *salt, size_t saltlen, unsigned int t_cost,
