@@ -21,7 +21,14 @@ int main()
      0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0XFF};
   const char *password = "Password";
   const char *data     = "I'm a header";
+  const uint8_t lambda = 3;
+#ifdef CATENA_INFO
+  const uint8_t min_garlic = 17;
+#else
+  const uint8_t min_garlic = 18;
+#endif
   const uint8_t garlic = 18;
+
 
   uint8_t hash1[H_LEN];
 
@@ -43,26 +50,29 @@ int main()
   memset(hash1,0,H_LEN);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	 (uint8_t *) data, strlen(data), garlic, hashlen, hash1);
+	 (uint8_t *) data, strlen(data), lambda, min_garlic, garlic,
+	 hashlen, hash1);
   print_hex(hash1, hashlen);
 
 #ifdef CATENA_INFO
   Catena_Client((uint8_t *) password, strlen(password), salt, SALT_LEN,
-		(uint8_t *) data, strlen(data), garlic, hashlen, x);
-  Catena_Server(garlic, x, hashlen, hash2);
+		(uint8_t *) data, strlen(data), lambda, min_garlic, garlic,
+		hashlen, x);
+  Catena_Server(lambda, garlic, x, hashlen, hash2);
   print_hex(hash2, hashlen);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	 (uint8_t *) data, strlen(data), garlic, hashlen, x);
-  CI_Update(x, garlic, garlic+1, hashlen, hash3);
+	 (uint8_t *) data, strlen(data), lambda, min_garlic, garlic-1,
+	 hashlen, x);
+  CI_Update(x, lambda, garlic-1, garlic, hashlen, hash3);
   print_hex(hash3, hashlen);
 
   Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	 (uint8_t *) "", 0, garlic, hashlen, hash1);
+	 (uint8_t *) "", 0, lambda, min_garlic, garlic, hashlen, hash1);
   print_hex(hash1, hashlen);
 
 
-  PHS(hash4, hashlen, password, strlen(password), salt, SALT_LEN, 0,
+  PHS(hash4, hashlen, password, strlen(password), salt, SALT_LEN, lambda,
       garlic);
   print_hex(hash4, hashlen);
 
@@ -71,16 +81,19 @@ int main()
   puts("Keys");
 
   Catena_KG((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	    (uint8_t *) data, strlen(data), garlic, H_LEN, 1,  key1);
+	    (uint8_t *) data, strlen(data), lambda, min_garlic, garlic,
+	    H_LEN, 1,  key1);
   print_hex(key1, H_LEN);
 
   Catena_KG((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	    (uint8_t *) data, strlen(data), garlic, H_LEN/4, 2,  key2);
+	    (uint8_t *) data, strlen(data), lambda, min_garlic, garlic,
+	    H_LEN/4, 2,  key2);
   print_hex(key2, H_LEN/4);
 
 
   Catena_KG((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
-	    (uint8_t *) data, strlen(data), garlic,3*H_LEN+10 , 3,  key3);
+	    (uint8_t *) data, strlen(data), lambda, min_garlic, garlic,
+	    3*H_LEN+10 , 3,  key3);
   print_hex(key3, 3*H_LEN+10);
 
 #endif

@@ -24,13 +24,15 @@ void test_output(const uint8_t *pwd,   const uint32_t pwdlen,
 		 const uint8_t garlic, const uint8_t hashlen)
 {
   uint8_t hash[hashlen];
+
   Catena(pwd, pwdlen, salt, saltlen, data, datalen,
-	 garlic, hashlen, hash);
+	 LAMBDA, garlic, garlic, hashlen, hash);
 
   print_hex("Password: ",pwd, pwdlen);
   print_hex("Salt: ",salt, saltlen);
   print_hex("Associated data:", data, datalen);
-  printf("Garlic:  %u\n",garlic);
+  printf("Lambda:  %u\n",LAMBDA);
+  printf("(Min-)Garlic:  %u\n",garlic);
   print_hex("\nOutput: ", hash, hashlen);
   puts("\n\n");
 }
