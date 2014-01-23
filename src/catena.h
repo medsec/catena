@@ -10,12 +10,12 @@
 #ifndef FAST_HASH
 #define H_LEN      64
 #else
-#define H_LEN      256
+#define H_LEN      4096
 #endif
 #define KEY_LEN    16
 #define LAMBDA      3
-#define GARLIC     22
-#define MIN_GARLIC 22
+#define GARLIC     18
+#define MIN_GARLIC 18
 
 /* Modes  */
 #define PASSWORD_HASHING_MODE 0

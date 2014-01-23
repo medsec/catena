@@ -74,10 +74,12 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
     }
   }
 
+  /*
   uint32_t *mem = (uint32_t *)(void *)r;
   for (i = 1; i < (c/sizeof(uint32_t))*H_LEN; i++) {
     printf("%u\n", mem[i]);
   }
+  */
 
   /* reverse(c - 1, garlic) == c - 1 */
   memcpy(h, r + (c - 1) * H_LEN, H_LEN);
