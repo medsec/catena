@@ -21,13 +21,13 @@ int main()
      0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0XFF};
   const char *password = "Password";
   const char *data     = "I'm a header";
-  const uint8_t lambda = 3;
+  const uint8_t lambda = LAMBDA;
 #ifdef CATENA_INFO
   const uint8_t min_garlic = 17;
 #else
-  const uint8_t min_garlic = 18;
+  const uint8_t min_garlic = MIN_GARLIC;
 #endif
-  const uint8_t garlic = 18;
+  const uint8_t garlic = GARLIC;
 
 
   uint8_t hash1[H_LEN];

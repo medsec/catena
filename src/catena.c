@@ -43,19 +43,22 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
   __Hash1(x, H_LEN, r);
 
   /* Top row */
+  printf("Hashing top row of Catena-%u graph, %lu long, garlic:%u\n", lambda, c, garlic);
   for (i = 1; i < c; i++) {
-    __Hash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
+    //__FastHash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
+    __FastHash2(r + (rand() % 1)*H_LEN, H_LEN, r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
   }
 
   /* Mid rows */
   for (k = 0; k < lambda; k++) {
-    __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    __FastHash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
 
+    printf("Hashing row %u into row %u and bit-reversing order\n", k, k+1);
     /* Replace r[reverse(i, garlic)] with new value */
     uint8_t *previousR = r, *p;
     for (i = 1; i < c; i++) {
       p = r + reverse(i, garlic) * H_LEN;
-      __Hash2(previousR, H_LEN, p, H_LEN, p);
+      __FastHash2(previousR, H_LEN, p, H_LEN, p);
       previousR = p;
     }
     k++;
@@ -63,11 +66,17 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
       break;
     }
     /* This is now sequential because (reverse(reverse(i, garlic), garlic) == i) */
-    __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    printf("Hashing row %u into row %u sequentially\n", k, k+1);
+    __FastHash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
     p = r + H_LEN;
     for (i = 1; i < c; i++, p += H_LEN) {
-      __Hash1(p - H_LEN, 128, p);
+      __FastHash2(p - H_LEN, H_LEN, p, H_LEN, p);
     }
+  }
+
+  uint32_t *mem = (uint32_t *)(void *)r;
+  for (i = 1; i < (c/sizeof(uint32_t))*H_LEN; i++) {
+    printf("%u\n", mem[i]);
   }
 
   /* reverse(c - 1, garlic) == c - 1 */
@@ -76,10 +85,22 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
 }
 
 
+/***************************************************/
+
+
+/* XOR the resulting hash onto X.  This insures X remains strong even though Y may be weak. */
+void xorHashOntoX(uint8_t x[H_LEN], uint8_t y[H_LEN]) {
+  uint32_t i;
+  for (i = 0; i < H_LEN; i++) {
+      x[i] ^= y[i];
+  }
+}
+
 
 /***************************************************/
 
 
+/* Shouldn't we add a parameter that tells us to clear pwd once we've computed x? - BC */
 int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t *salt,  const uint8_t  saltlen,
 	     const uint8_t *data,  const uint32_t datalen,
@@ -87,11 +108,11 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t garlic, const uint8_t  hashlen,
 	     const uint8_t client, const uint8_t  tweak_id, uint8_t *hash)
 {
- uint8_t x[H_LEN];
+ uint8_t x[H_LEN], y[H_LEN];
  uint8_t t[5];
  uint8_t c;
 
- if ((hashlen > H_LEN) || (garlic > 63) || (min_garlic > garlic)) return -1;
+ if ((hashlen > 64) || (garlic > 63) || (min_garlic > garlic)) return -1;
 
   /* Compute Tweak */
   t[0] = 0xFF;
@@ -101,18 +122,20 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
   t[4] = saltlen;
 
   /* Compute H(AD) */
-  __Hash1((uint8_t *) data, datalen,x);
+  __Hash1((uint8_t *) data, datalen, x); /* If __Hash1 casts datalen to uint8_t, this is a potential bug - BC */
 
   /* Compute the initial value to hash  */
-  __Hash4(t,5, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
+  __Hash4(t, 5, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
 
-  memset(x+hashlen, 0, H_LEN-hashlen);
+  /* Why clear the later portion?  __Hash4 filled it with nice random-ish data - BC */
+  /* memset(x+hashlen, 0, H_LEN-hashlen); */
 
   for(c=min_garlic; c <= garlic; c++)
     {
-      LBRH(x, lambda, c, x);
+      LBRH(x, lambda, c, y);
+      xorHashOntoX(x, y); /* This is because FastHash may not produce very random looking hashes - BC */
       if( (c==garlic) && (client == CLIENT))
-	{
+	{ /* Worst indent scheme ever! 2 for main body, but 4 for every other level? - BC */
 	  memcpy(hash, x, H_LEN);
 	  return 0;
 	}
@@ -150,7 +173,7 @@ int Naive_Catena(const char *pwd,  const char *salt, const char *data,
 		   (uint8_t  *) salt, strlen(salt),
 		   (uint8_t  *) data, strlen(data),
 		   LAMBDA, MIN_GARLIC, GARLIC,
-		   H_LEN, REGULAR, PASSWORD_HASHING_MODE, hash);
+		   64, REGULAR, PASSWORD_HASHING_MODE, hash);
 }
 
 /***************************************************/
@@ -162,7 +185,7 @@ int Simple_Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 		  uint8_t hash[H_LEN])
 {
   return __Catena(pwd, pwdlen, salt, saltlen, data, datalen,
-		  LAMBDA, MIN_GARLIC, GARLIC, H_LEN,
+		  LAMBDA, MIN_GARLIC, GARLIC, 64,
 		  REGULAR, PASSWORD_HASHING_MODE, hash);
 }
 
@@ -188,7 +211,7 @@ int Catena_Server(const uint8_t garlic,  const uint8_t x[H_LEN],
 {
   uint8_t z[H_LEN];
 
-  if (hashlen > H_LEN) return -1;
+  if (hashlen > 64) return -1;
   __Hash2(&garlic,1,x, H_LEN, z);
     memcpy(hash, z, hashlen);
 
@@ -234,7 +257,7 @@ void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
   keylen = TO_LITTLE_ENDIAN_32(keylen);
 
   __Catena(pwd, pwdlen, salt, saltlen, data, datalen,
-	   lambda, min_garlic, garlic, H_LEN, REGULAR, KEY_DERIVATION_MODE,
+	   lambda, min_garlic, garlic, 64, REGULAR, KEY_DERIVATION_MODE,
 	   hash);
 
   for(i=0; i < len; i++) {
