@@ -141,7 +141,7 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
   /* Could this call be used to determine the password length? */
   __Hash4(t, 5, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
 
-  /* Why clear the later portion?  __Hash4 filled it with nice random-ish data - BC
+  /* Why clear the later portion?  __Hash4 filled it with nice random-ish data - BC */
   memset(x+hashlen, 0, H_LEN-hashlen);
 
   for(c=min_garlic; c <= garlic; c++)
