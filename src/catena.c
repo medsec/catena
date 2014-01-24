@@ -53,21 +53,9 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
 
   /* Top row */
   printf("Hashing top row of Catena-%u graph, %lu long, garlic:%u\n", lambda, c, garlic);
-#ifndef FAST_HASH
   for (i = 1; i < c; i++) {
-    __Hash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
+    __FastHash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
   }
-#else
-    // Note that I don't get random enough data without a hack like this.  On the upside,
-    // this dramatically hurts attackers who think they can just run a pebble along row[0].
-    // Maybe we should not care that the data is not random enough, or I should improve __FastHash1
-    // This is actually just NoelKDF run on the first row :-)
-    // This version "weakly" passes the dieharder tests, with H_LEN == 256, garlic == 22
-  uint32_t z = 1, w = 1;
-  for (i = 1; i < c; i++) {
-    __FastHash2(r + (i-1)*H_LEN, H_LEN, r + (randNum(&z, &w) % i)*H_LEN, H_LEN, r + i*H_LEN);
-  }
-#endif
 
   /* Mid rows */
   for (k = 0; k < lambda; k++) {
