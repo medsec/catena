@@ -125,7 +125,7 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
  uint8_t t[5];
  uint8_t c;
 
- if ((hashlen > 64) || (garlic > 63) || (min_garlic > garlic)) return -1;
+ if ((hashlen > MAX_HASHLEN) || (garlic > 63) || (min_garlic > garlic)) return -1;
 
   /* Compute Tweak */
   t[0] = 0xFF;
@@ -191,7 +191,7 @@ int Naive_Catena(const char *pwd,  const char *salt, const char *data,
 		   (uint8_t  *) salt, strlen(salt),
 		   (uint8_t  *) data, strlen(data),
 		   LAMBDA, MIN_GARLIC, GARLIC,
-		   64, REGULAR, PASSWORD_HASHING_MODE, hash);
+		   MAX_HASHLEN, REGULAR, PASSWORD_HASHING_MODE, hash);
 }
 
 /***************************************************/
@@ -203,7 +203,7 @@ int Simple_Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 		  uint8_t hash[H_LEN])
 {
   return __Catena(pwd, pwdlen, salt, saltlen, data, datalen,
-		  LAMBDA, MIN_GARLIC, GARLIC, 64,
+		  LAMBDA, MIN_GARLIC, GARLIC, MAX_HASHLEN,
 		  REGULAR, PASSWORD_HASHING_MODE, hash);
 }
 
@@ -229,7 +229,7 @@ int Catena_Server(const uint8_t garlic,  const uint8_t x[H_LEN],
 {
   uint8_t z[H_LEN];
 
-  if (hashlen > 64) return -1;
+  if (hashlen > MAX_HASHLEN) return -1;
   __Hash2(&garlic,1,x, H_LEN, z);
     memcpy(hash, z, hashlen);
 
@@ -275,7 +275,7 @@ void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
   keylen = TO_LITTLE_ENDIAN_32(keylen);
 
   __Catena(pwd, pwdlen, salt, saltlen, data, datalen,
-	   lambda, min_garlic, garlic, 64, REGULAR, KEY_DERIVATION_MODE,
+	   lambda, min_garlic, garlic, MAX_HASHLEN, REGULAR, KEY_DERIVATION_MODE,
 	   hash);
 
   for(i=0; i < len; i++) {

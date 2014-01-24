@@ -45,7 +45,7 @@ void simpletest(const char *password, const char *salt, const char *header,
 {
   test_output((uint8_t *) password, strlen(password),
 	      (uint8_t *) salt,     strlen(salt),
-	      (uint8_t *) header,   strlen(header), garlic, 64);
+	      (uint8_t *) header,   strlen(header), garlic, MAX_HASHLEN);
 }
 
 /*******************************************************************/

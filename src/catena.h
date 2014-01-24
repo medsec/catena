@@ -12,6 +12,7 @@
 #else
 #define H_LEN      4096
 #endif
+#define MAX_HASHLEN 64
 #define KEY_LEN    16
 #define LAMBDA      3
 #define GARLIC     18
