@@ -1,5 +1,5 @@
 
-all: blake2b sha512
+all: blake2b sha512 multhash
 
 blake2b:
 	cd src; make $@; cd 
@@ -8,6 +8,11 @@ blake2b:
 
 
 sha512:
+	cd src; make $@; cd ..
+	cp src/catena-$@-test .
+	cp src/catena-$@-test_vectors .
+
+multhash:
 	cd src; make $@; cd ..
 	cp src/catena-$@-test .
 	cp src/catena-$@-test_vectors .
