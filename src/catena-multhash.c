@@ -32,12 +32,18 @@ inline void __FastHash2(const uint8_t *i1, const uint32_t i1len,
   uint32_t *toBlock = (uint32_t *)(void *)hash;
   (void)i1len; /* Ignore i1len and i2len */
   (void)i2len;
-  uint32_t value = prevBlock[H_LEN-1];
+  static uint32_t prevValue = 0;
+  uint32_t value = prevBlock[H_LEN/sizeof(uint32_t)-1];
+  if(prevValue != 0 && value != prevValue) {
+      printf("Bad previous value\n");
+      exit(1);
+  }
   uint32_t i;
   for(i = 0; i < H_LEN/sizeof(uint32_t); i++) {
     value = value*(*prevBlock++ | 3) + *fromBlock++;
     *toBlock++ = value;
   }
+  prevValue = value;
 }
 
 

@@ -32,6 +32,15 @@ uint64_t reverse(uint64_t x, const uint8_t n)
 }
 
 
+// Simple rand() function.
+// from: http://www.codeproject.com/Articles/25172/Simple-Random-Number-Generation
+static inline uint32_t randNum(uint32_t *z, uint32_t *w) {
+    *z = 36969 * (*z & 65535) + (*z >> 16);
+    *w = 18000 * (*w & 65535) + (*w >> 16);
+    return (*z << 16) + *w;
+}
+
+
 void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
 	  const uint8_t garlic,   uint8_t h[H_LEN])
 {
@@ -44,10 +53,21 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
 
   /* Top row */
   printf("Hashing top row of Catena-%u graph, %lu long, garlic:%u\n", lambda, c, garlic);
+#ifndef FAST_HASH
   for (i = 1; i < c; i++) {
-    //__FastHash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
-    __FastHash2(r + (rand() % 1)*H_LEN, H_LEN, r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
+    __Hash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
   }
+#else
+    // Note that I don't get random enough data without a hack like this.  On the upside,
+    // this dramatically hurts attackers who think they can just run a pebble along row[0].
+    // Maybe we should not care that the data is not random enough, or I should improve __FastHash1
+    // This is actually just NoelKDF run on the first row :-)
+    // This version "weakly" passes the dieharder tests, with H_LEN == 256, garlic == 22
+  uint32_t z = 1, w = 1;
+  for (i = 1; i < c; i++) {
+    __FastHash2(r + (i-1)*H_LEN, H_LEN, r + (randNum(&z, &w) % i)*H_LEN, H_LEN, r + i*H_LEN);
+  }
+#endif
 
   /* Mid rows */
   for (k = 0; k < lambda; k++) {
@@ -70,8 +90,9 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
     __FastHash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
     p = r + H_LEN;
     for (i = 1; i < c; i++, p += H_LEN) {
-      __FastHash2(p - H_LEN, H_LEN, p, H_LEN, p);
+      __FastHash1(p - H_LEN, H_LEN*2, p);
     }
+
   }
 
   /*
@@ -102,7 +123,6 @@ void xorHashOntoX(uint8_t x[H_LEN], uint8_t y[H_LEN]) {
 /***************************************************/
 
 
-/* Shouldn't we add a parameter that tells us to clear pwd once we've computed x? - BC */
 int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t *salt,  const uint8_t  saltlen,
 	     const uint8_t *data,  const uint32_t datalen,
@@ -127,10 +147,12 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
   __Hash1((uint8_t *) data, datalen, x); /* If __Hash1 casts datalen to uint8_t, this is a potential bug - BC */
 
   /* Compute the initial value to hash  */
+  /* Could this call be used to determine the password length? */
   __Hash4(t, 5, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
 
-  /* Why clear the later portion?  __Hash4 filled it with nice random-ish data - BC */
-  /* memset(x+hashlen, 0, H_LEN-hashlen); */
+  /* Why clear the later portion?  __Hash4 filled it with nice random-ish data - BC
+   * This is a password length dependet call.  Couldn't it could give away the user's password length? */
+  memset(x+hashlen, 0, H_LEN-hashlen);
 
   for(c=min_garlic; c <= garlic; c++)
     {
