@@ -130,7 +130,10 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t garlic, const uint8_t  hashlen,
 	     const uint8_t client, const uint8_t  tweak_id, uint8_t *hash)
 {
- uint8_t x[H_LEN], y[H_LEN];
+ uint8_t x[H_LEN];
+#ifdef FAST_HASH
+ uint8_t y[H_LEN];
+#endif
  uint8_t t[5];
  uint8_t c;
 
@@ -156,8 +159,12 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 
   for(c=min_garlic; c <= garlic; c++)
     {
+#ifndef FAST_HASH
+      LBRH(x, lambda, c, x);
+#else
       LBRH(x, lambda, c, y);
       xorHashOntoX(x, y); /* This is because FastHash may not produce very random looking hashes - BC */
+#endif
       if( (c==garlic) && (client == CLIENT))
 	{ /* Worst indent scheme ever! 2 for main body, but 4 for every other level? - BC */
 	  memcpy(hash, x, H_LEN);
