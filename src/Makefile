@@ -1,6 +1,8 @@
 CC=gcc
 HDIR=./blake2
-CFLAGS=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -s -m64 -msse4.2 -W -Wall  -L$(HDIR) -I$(HDIR)
+#CFLAGS=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -s -m64 -msse4.2 -W -Wall  -L$(HDIR) -I$(HDIR)
+# This is actually faster on my machine
+CFLAGS=-O2 -std=c99 -fgnu89-inline -s -m64 -W -Wall  -L$(HDIR) -I$(HDIR)
 #CFLAGS=-g -std=c99 -fgnu89-inline -m64 -W -Wall  -L$(HDIR) -I$(HDIR)
 
 HASH=$(HDIR)/blake2b.c
