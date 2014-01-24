@@ -37,4 +37,4 @@ catena-multhash-test_vectors: catena_test_vectors.c catena.c catena-sha512.c cat
 	$(CC) $(CFLAGS) -DFAST_HASH -o $@ catena_test_vectors.c catena.c catena-sha512.c catena-multhash.c -lssl -lcrypto
 
 clean:
-	rm -f  *~ *.o catena-blake2b-test catena-blake2b-test_vectors catena-sha512-test catena-sha512-test_vectors catena-blake2b-opt-test
+	rm -f  *~ *.o catena-blake2b-test catena-blake2b-test_vectors catena-sha512-test catena-sha512-test_vectors catena-blake2b-opt-test catena-multhash-test catena-multhash-test_vectors

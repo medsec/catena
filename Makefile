@@ -19,5 +19,5 @@ multhash:
 
 clean:
 	cd src;	make clean; cd ..
-	rm -f *~ catena-blake2b-test catena-sha512-test 
-	rm -f catena-blake2b-test_vectors catena-sha512-test_vectors
+	rm -f *~ catena-blake2b-test catena-sha512-test catena-multhash-test
+	rm -f catena-blake2b-test_vectors catena-sha512-test_vectors catena-multhash-test_vectors
