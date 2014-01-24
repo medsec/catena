@@ -142,7 +142,6 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
   __Hash4(t, 5, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
 
   /* Why clear the later portion?  __Hash4 filled it with nice random-ish data - BC
-   * This is a password length dependet call.  Couldn't it could give away the user's password length? */
   memset(x+hashlen, 0, H_LEN-hashlen);
 
   for(c=min_garlic; c <= garlic; c++)
