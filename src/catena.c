@@ -32,12 +32,15 @@ uint64_t reverse(uint64_t x, const uint8_t n)
 }
 
 
-// Simple rand() function.
-// from: http://www.codeproject.com/Articles/25172/Simple-Random-Number-Generation
-static inline uint32_t randNum(uint32_t *z, uint32_t *w) {
-    *z = 36969 * (*z & 65535) + (*z >> 16);
-    *w = 18000 * (*w & 65535) + (*w >> 16);
-    return (*z << 16) + *w;
+/* Reverse the block of bytes 4-bytes at a time if needed to match endian-ness of the machine. */
+void adjustForUint32Endian(uint8_t *x, uint32_t len)
+{
+  uint32_t *w = (uint32_t *)(void *)x;
+  len >>= 2;
+  while(len--) {
+    uint32_t word = TO_LITTLE_ENDIAN_32(*w);
+    *w++ = word;
+  }
 }
 
 
@@ -50,6 +53,9 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
   uint32_t k;
 
   __Hash1(x, H_LEN, r);
+#ifdef FAST_HASH
+  adjustForUint32Endian(r, H_LEN);
+#endif
 
   /* Top row */
   //printf("Hashing top row of Catena-%u graph, %lu long, garlic:%u\n", lambda, c, garlic);
@@ -92,6 +98,9 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
 
   /* reverse(c - 1, garlic) == c - 1 */
   memcpy(h, r + (c - 1) * H_LEN, H_LEN);
+#ifdef FAST_HASH
+  adjustForUint32Endian(h, H_LEN);
+#endif
   free(r);
 }
 
@@ -141,7 +150,6 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
   /* Could this call be used to determine the password length? */
   __Hash4(t, 5, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
 
-  /* Why clear the later portion?  __Hash4 filled it with nice random-ish data - BC */
   memset(x+hashlen, 0, H_LEN-hashlen);
 
   for(c=min_garlic; c <= garlic; c++)
