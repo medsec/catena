@@ -36,12 +36,12 @@ inline void __FastHash1(const uint8_t *input, const uint32_t inputlen,
     const uint32_t *startVal = prevVal;
     const uint32_t *fromVal;
     uint32_t *toVal = (uint32_t *)(void *)hash;
-    static uint32_t prevValue = 0;
+    //static uint32_t prevValue = 0;
     uint32_t value = prevVal[H_LEN/sizeof(uint32_t)-1];
-    if(prevValue != 0 && value != prevValue) {
-      printf("Bad previous value\n");
-      exit(1);
-    }
+    //if(prevValue != 0 && value != prevValue) {
+      //printf("Bad previous value\n");
+      //exit(1);
+    //}
     uint32_t z = 1, w = 1;
     uint32_t i;
     for(i = 0; i < (H_LEN/sizeof(uint32_t))/8; i++) {
@@ -51,6 +51,7 @@ inline void __FastHash1(const uint8_t *input, const uint32_t inputlen,
           value = value*(*prevVal++ | 3) + *fromVal++;
           *toVal++ = value;
       }
+      //prevValue = value;
     }
   }
 }
@@ -71,18 +72,18 @@ inline void __FastHash2(const uint8_t *i1, const uint32_t i1len,
     printf("Expected ilen1 == ilen2\n");
     exit(1);
   }
-  static uint32_t prevValue = 0;
+  //static uint32_t prevValue = 0;
   uint32_t value = prevBlock[i1len/sizeof(uint32_t)-1];
-  if(prevValue != 0 && value != prevValue) {
-    printf("Bad previous value\n");
-    exit(1);
-  }
+  //if(prevValue != 0 && value != prevValue) {
+    //printf("Bad previous value\n");
+    //exit(1);
+  //}
   uint32_t i;
   for(i = 0; i < i1len/sizeof(uint32_t); i++) {
     value = value*(*prevBlock++ | 3) + *fromBlock++;
     *toBlock++ = value;
   }
-  prevValue = value;
+  //prevValue = value;
 }
 
 

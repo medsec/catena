@@ -52,7 +52,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
   __Hash1(x, H_LEN, r);
 
   /* Top row */
-  printf("Hashing top row of Catena-%u graph, %lu long, garlic:%u\n", lambda, c, garlic);
+  //printf("Hashing top row of Catena-%u graph, %lu long, garlic:%u\n", lambda, c, garlic);
   for (i = 1; i < c; i++) {
     __FastHash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
   }
@@ -61,7 +61,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
   for (k = 0; k < lambda; k++) {
     __FastHash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
 
-    printf("Hashing row %u into row %u and bit-reversing order\n", k, k+1);
+    //printf("Hashing row %u into row %u and bit-reversing order\n", k, k+1);
     /* Replace r[reverse(i, garlic)] with new value */
     uint8_t *previousR = r, *p;
     for (i = 1; i < c; i++) {
@@ -74,7 +74,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
       break;
     }
     /* This is now sequential because (reverse(reverse(i, garlic), garlic) == i) */
-    printf("Hashing row %u into row %u sequentially\n", k, k+1);
+    //printf("Hashing row %u into row %u sequentially\n", k, k+1);
     __FastHash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
     p = r + H_LEN;
     for (i = 1; i < c; i++, p += H_LEN) {
