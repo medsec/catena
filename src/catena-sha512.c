@@ -5,7 +5,7 @@
 
 /***************************************************/
 
-inline void __Hash1(const uint8_t *input, const uint8_t inputlen,
+inline void __Hash1(const uint8_t *input, const uint32_t inputlen,
 		      uint8_t hash[H_LEN])
 {
   SHA512_CTX ctx;
