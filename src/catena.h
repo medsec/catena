@@ -14,7 +14,7 @@
 #endif
 #define MAX_HASHLEN 64
 #define KEY_LEN    16
-#define LAMBDA      3
+#define LAMBDA      2
 #define GARLIC     18
 #define MIN_GARLIC 18
 

@@ -43,26 +43,11 @@ void adjustForUint32Endian(uint8_t *x, uint32_t len)
   }
 }
 
-
-void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
-	  const uint8_t garlic,   uint8_t h[H_LEN])
+void computeMidRows(uint8_t *r, const uint8_t lambda, const uint8_t garlic)
 {
   const uint64_t c = UINT64_C(1) << garlic;
-  uint8_t *r = malloc(c*H_LEN);
-  uint64_t i = 0;
+  uint64_t i;
   uint32_t k;
-
-  __Hash1(x, H_LEN, r);
-#ifdef FAST_HASH
-  adjustForUint32Endian(r, H_LEN);
-#endif
-
-  /* Top row */
-  for (i = 1; i < c; i++) {
-    __FastHash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
-  }
-
-  /* Mid rows */
   for (k = 0; k < lambda; k++) {
     __FastHash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
 
@@ -75,7 +60,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
     }
     k++;
     if (k >= lambda) {
-      break;
+      return;
     }
     /* This is now sequential because (reverse(reverse(i, garlic), garlic) == i) */
     __FastHash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
@@ -83,8 +68,29 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
     for (i = 1; i < c; i++, p += H_LEN) {
       __FastHash1(p - H_LEN, H_LEN*2, p);
     }
-
   }
+}
+
+void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
+	  const uint8_t garlic,   uint8_t h[H_LEN])
+{
+  const uint64_t c = UINT64_C(1) << garlic;
+  uint8_t *r = malloc(c*H_LEN);
+  uint64_t i;
+
+  __Hash1(x, H_LEN, r);
+#ifdef FAST_HASH
+  adjustForUint32Endian(r, H_LEN);
+#endif
+
+  /* Top row */
+  for (i = 1; i < c >> 3; i++) {
+    __FastHash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
+  }
+  computeMidRows(r, 7, garlic - 3);
+
+  /* Remaining rows */
+  computeMidRows(r, lambda, garlic);
 
   /*
   uint32_t *mem = (uint32_t *)(void *)r;
