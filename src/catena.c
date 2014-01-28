@@ -83,11 +83,11 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
   adjustForUint32Endian(r, H_LEN);
 #endif
 
-  /* Top row */
-  for (i = 1; i < c >> 3; i++) {
+  /* Top row with Catena-3 sub-graph */
+  for (i = 1; i < c >> 2; i++) {
     __FastHash1(r + (i-1)*H_LEN, H_LEN, r + i*H_LEN);
   }
-  computeMidRows(r, 7, garlic - 3);
+  computeMidRows(r, 3, garlic - 3);
 
   /* Remaining rows */
   computeMidRows(r, lambda, garlic);
