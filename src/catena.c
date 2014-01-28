@@ -66,7 +66,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
     __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
     p = r + H_LEN;
     for (i = 1; i < c; i++, p += H_LEN) {
-      __Hash1(p - H_LEN, 128, p);
+      __Hash1(p - H_LEN, 2 * H_LEN, p);
     }
   }
 
