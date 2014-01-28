@@ -14,3 +14,9 @@ Content
 * C reference implementation of Catena-blake2b 
 * C reference implementation of Catena-sha512 (depends on libssl and libcrypto) 
 
+Dependencies
+------------
+* gcc     (http://gcc.gnu.org/)
+* openssl (http://www.openssl.org/)
+* make    (http://www.gnu.org/software/make/)
+
