@@ -49,7 +49,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
 
   /* Mid rows */
   for (k = 0; k < lambda; k++) {
-    __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    __Hash2(r, H_LEN, r + (c-1)*H_LEN, H_LEN, r);
 
     /* Replace r[reverse(i, garlic)] with new value */
     uint8_t *previousR = r, *p;
@@ -63,7 +63,7 @@ void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
       break;
     }
     /* This is now sequential because (reverse(reverse(i, garlic), garlic) == i) */
-    __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    __Hash2(r, H_LEN, r + (c-1)*H_LEN, H_LEN, r);
     p = r + H_LEN;
     for (i = 1; i < c; i++, p += H_LEN) {
       __Hash1(p - H_LEN, 2 * H_LEN, p);
@@ -94,17 +94,16 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
  if ((hashlen > H_LEN) || (garlic > 63) || (min_garlic > garlic)) return -1;
 
   /* Compute Tweak */
-  t[0] = 0xFF;
-  t[1] = tweak_id;
-  t[2] = lambda;
-  t[3] = hashlen;
-  t[4] = saltlen;
+  t[0] = tweak_id;
+  t[1] = lambda;
+  t[2] = hashlen;
+  t[3] = saltlen;
 
   /* Compute H(AD) */
   __Hash1((uint8_t *) data, datalen,x);
 
   /* Compute the initial value to hash  */
-  __Hash4(t,5, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
+  __Hash4(t, 4, x, H_LEN, (uint8_t *) pwd,  pwdlen, salt, saltlen, x);
 
   memset(x+hashlen, 0, H_LEN-hashlen);
 
