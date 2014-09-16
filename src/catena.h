@@ -19,16 +19,12 @@
 #define REGULAR 0
 #define CLIENT 1
 
-
-
-/* Return the reverse bit order of x where x is interpreted as n-bit value */
-uint64_t reverse(uint64_t x, const uint8_t n);
-
-
-/* This function computes the  \lambda-BRH of x. */
-void LBRH(const uint8_t x[H_LEN], const uint8_t lambda,
-	  const uint8_t garlic,   uint8_t h[H_LEN]);
-
+/*F function of Catena. Possible instantiations:
+*	-Catena-BRG using a Bit-Reversal Graph
+* 	-Catena-DBG using a Double-Butterfly Graph
+*/
+void F(const uint8_t x[H_LEN], const uint8_t lambda,
+    const uint8_t garlic,   uint8_t h[H_LEN]);
 
 /* Returns -1 if an an error occurred, otherwise 0. */
 int Catena(const uint8_t *pwd,   const uint32_t pwdlen,
