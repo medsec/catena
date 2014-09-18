@@ -32,17 +32,16 @@ uint64_t ind(uint16_t i, uint64_t j, uint64_t c, uint32_t m){
     return j;
   }
   else if(i % 3 == 1){
-    if(j < m){
+    if(j < m){ //this still fits in the array
       return j + c;
     }
-    else{
+    else{ //here we have to start overwriting elements at the beginning
       return j - m;
     }
   }
   else{ //i % 3 == 2
     return j + m;
   }
-
 }
 
 /* Computes the hash of x using a Double Butterfly Graph,
@@ -72,20 +71,29 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda,
   for (k = 0; k < lambda; k++) {
     //levels
     for(i=1; i < l; i++){
-      XOR(r + ind(i-1, 0, c,m) * H_LEN, 
-        r + ind(i-1,c-1,c,m)*H_LEN, tmp);
-      __Hash2(r + ind(i-1,sigma(garlic,i-1,0),c,m) * H_LEN, H_LEN, tmp,
+      //tmp:= v2^g-1 XOR v0
+      XOR(r + ind(i-1, 0, c,m) * H_LEN, r + ind(i-1,c-1,c,m)*H_LEN, tmp);
+      //r0 := H(tmp || vsigma(g,i-1,0) )
+      __Hash2(tmp, H_LEN, r + ind(i-1,sigma(garlic,i-1,0),c,m) * H_LEN,
          H_LEN, r + ind(i,0,c,m) *H_LEN);
       //elements
       for(j = 1; j < c; j++){
+        //tmp:= ri-1 XOR vi
         XOR(r + ind(i-1,j,c,m) * H_LEN, r + ind(i,j-1,c,m)*H_LEN, tmp);
-        __Hash2(r + ind(i-1,sigma(garlic,i-1,j),c,m) * H_LEN, H_LEN, tmp, 
+        //ri := H(tmp || vsigma(g,i-1,j))
+        __Hash2(tmp, H_LEN, r + ind(i-1,sigma(garlic,i-1,j),c,m) * H_LEN, 
           H_LEN, r + ind(i,j,c,m) * H_LEN);
       }
     }
-    memcpy(r,r +ind(i-1,0,c,m) * H_LEN, c * H_LEN);
+    //copy last row to the beginning of the array
+    if((i-1) % 3 == 1){
+      memcpy(r + m * H_LEN,r, m * H_LEN);
+      memcpy(r,r + c * H_LEN, m * H_LEN);
+    }
+    else if((i-1) % 3 == 2){
+      memcpy(r,r + m * H_LEN, c * H_LEN);
+    }
   }
-
-  memcpy(h, r + ind(l-1,c-1,c,m) * H_LEN, H_LEN);
+  memcpy(h, r + (c-1) * H_LEN, H_LEN);
   free(r);
 }
