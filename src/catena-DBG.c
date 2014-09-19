@@ -4,16 +4,16 @@
 #include "hash.h"
 
 /*  Sigma function that defines the diagonal connections of a DBG
-*	diagonal front: flip the (g-i)th bit. Inverse Buttferly Graph
-*	diagonal back: flip the i-(g-1)th bit. Regular Butterfly Graph
+*	diagonal front: flip the (g-i)th bit (Inverse Buttferly Graph)
+*	diagonal back: flip the i-(g-1)th bit (Regular Butterfly Graph)
 */
 uint64_t sigma(const uint8_t g, const uint64_t i, const uint64_t j)
 {
   if(i < g){
-    return (j ^ (1 << (g-1-i)));
+    return (j ^ (1 << (g-1-i))); //diagonal front
   }
   else{
-    return (j ^ (1 << (i-(g-1)))); 
+    return (j ^ (1 << (i-(g-1)))); //diagonal back
   }
 }
 
@@ -32,10 +32,10 @@ uint64_t ind(uint16_t i, uint64_t j, uint64_t c, uint32_t m){
     return j;
   }
   else if(i % 3 == 1){
-    if(j < m){ //this still fits in the array
+    if(j < m){ //still fits in the array
       return j + c;
     }
-    else{ //here we have to start overwriting elements at the beginning
+    else{ //start overwriting elements at the beginning
       return j - m;
     }
   }
@@ -69,14 +69,14 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda,
 
   //iterations
   for (k = 0; k < lambda; k++) {
-    //levels
+    //rows
     for(i=1; i < l; i++){
       //tmp:= v2^g-1 XOR v0
       XOR(r + ind(i-1, 0, c,m) * H_LEN, r + ind(i-1,c-1,c,m)*H_LEN, tmp);
       //r0 := H(tmp || vsigma(g,i-1,0) )
       __Hash2(tmp, H_LEN, r + ind(i-1,sigma(garlic,i-1,0),c,m) * H_LEN,
          H_LEN, r + ind(i,0,c,m) *H_LEN);
-      //elements
+      //vertices
       for(j = 1; j < c; j++){
         //tmp:= ri-1 XOR vi
         XOR(r + ind(i-1,j,c,m) * H_LEN, r + ind(i,j-1,c,m)*H_LEN, tmp);
