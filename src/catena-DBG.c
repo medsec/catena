@@ -27,7 +27,8 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
 }
 
 /*calculate actual index from level and element index*/
-uint64_t ind(uint16_t i, uint64_t j, uint64_t c, uint32_t m){
+uint64_t ind(uint16_t i, uint64_t j, uint8_t co, uint64_t c, uint32_t m){
+  i += co;
   if(i % 3 == 0){
     return j;
   }
@@ -60,6 +61,8 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda,
   uint16_t i;
   uint64_t j;
   uint8_t k;
+  uint8_t co = 0; //carry over from last iteration
+
 
   //top row
   __Hash1(x, H_LEN, r);
@@ -72,28 +75,21 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda,
     //rows
     for(i=1; i < l; i++){
       //tmp:= v2^g-1 XOR v0
-      XOR(r + ind(i-1, 0, c,m) * H_LEN, r + ind(i-1,c-1,c,m)*H_LEN, tmp);
+      XOR(r + ind(i-1,0,co,c,m) * H_LEN, r + ind(i-1,c-1,co,c,m)*H_LEN, tmp);
       //r0 := H(tmp || vsigma(g,i-1,0) )
-      __Hash2(tmp, H_LEN, r + ind(i-1,sigma(garlic,i-1,0),c,m) * H_LEN,
-         H_LEN, r + ind(i,0,c,m) *H_LEN);
+      __Hash2(tmp, H_LEN, r + ind(i-1,sigma(garlic,i-1,0),co,c,m) * H_LEN,
+         H_LEN, r + ind(i,0,co,c,m) *H_LEN);
       //vertices
       for(j = 1; j < c; j++){
         //tmp:= ri-1 XOR vi
-        XOR(r + ind(i-1,j,c,m) * H_LEN, r + ind(i,j-1,c,m)*H_LEN, tmp);
+        XOR(r + ind(i-1,j,co,c,m) * H_LEN, r + ind(i,j-1,co,c,m)*H_LEN, tmp);
         //ri := H(tmp || vsigma(g,i-1,j))
-        __Hash2(tmp, H_LEN, r + ind(i-1,sigma(garlic,i-1,j),c,m) * H_LEN, 
-          H_LEN, r + ind(i,j,c,m) * H_LEN);
+        __Hash2(tmp, H_LEN, r + ind(i-1,sigma(garlic,i-1,j),co,c,m) * H_LEN, 
+          H_LEN, r + ind(i,j,co,c,m) * H_LEN);
       }
     }
-    //copy last row to the beginning of the array
-    if((i-1) % 3 == 1){
-      memcpy(r + m * H_LEN,r, m * H_LEN);
-      memcpy(r,r + c * H_LEN, m * H_LEN);
-    }
-    else if((i-1) % 3 == 2){
-      memcpy(r,r + m * H_LEN, c * H_LEN);
-    }
+    co = (co + (i-1)) % 3;
   }
-  memcpy(h, r + (c-1) * H_LEN, H_LEN);
+  memcpy(h, r + ind(0,c-1,co,c,m) * H_LEN, H_LEN);
   free(r);
 }
