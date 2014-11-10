@@ -26,7 +26,7 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t *salt,  const uint8_t  saltlen,
 	     const uint8_t *data,  const uint32_t datalen,
 	     const uint8_t lambda, const uint8_t  min_garlic,
-	     const uint8_t garlic, const uint8_t  hashlen,
+	     const uint8_t garlic, const size_t  hashlen,
 	     const uint8_t client, const uint8_t  tweak_id, uint8_t *hash)
 {
  uint8_t x[H_LEN];

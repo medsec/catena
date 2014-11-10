@@ -1,6 +1,6 @@
 CC=gcc
 HDIR=./blake2
-TARGETDIR=./bin
+TARGETDIR=../bin
 
 ARCH := $(shell getconf LONG_BIT)
 
