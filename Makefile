@@ -3,19 +3,9 @@ all: blake2b sha512
 
 blake2b:
 	cd src; make $@; cd 
-	cp bin/catena-BRG-$@-test .
-	cp bin/catena-BRG-$@-test_vectors .
-	cp bin/catena-DBG-$@-test .
-	cp bin/catena-DBG-$@-test_vectors .
-
 
 sha512:
 	cd src; make $@; cd ..
-	cp bin/catena-BRG-$@-test .
-	cp bin/catena-BRG-$@-test_vectors .
-	cp bin/catena-DBG-$@-test .
-	cp bin/catena-DBG-$@-test_vectors .
-
 
 clean:
 	cd src;	make clean; cd ..

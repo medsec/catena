@@ -1,6 +1,6 @@
 CC=gcc
 HDIR=./blake2
-TARGETDIR=../bin
+TARGETDIR=../
 
 ARCH := $(shell getconf LONG_BIT)
 
@@ -8,8 +8,6 @@ CFLAGS_32=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -s -msse4.2 -W -Wall 
 CFLAGS_64=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -s -m64 -msse4.2 -W -Wall  -L$(HDIR) -I$(HDIR)
 
 HASH=$(HDIR)/blake2b.c
-
-$(shell mkdir -p $(TARGETDIR))
 
 all: blake2b sha512
 
