@@ -33,7 +33,8 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
  uint8_t t[5];
  uint8_t c;
 
- if ((hashlen > H_LEN) || (garlic > 63) || (min_garlic > garlic)) return -1;
+ if ((hashlen > H_LEN) || (garlic > 63) || (min_garlic > garlic) || (lambda == 0))
+     return -1;
 
   /* Compute Tweak */
   t[0] = 0xFF;

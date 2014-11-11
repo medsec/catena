@@ -10,8 +10,8 @@
 #define H_LEN      64
 #define KEY_LEN    16
 #define LAMBDA      3
-#define GARLIC     18
-#define MIN_GARLIC 18
+#define GARLIC     14
+#define MIN_GARLIC 14
 
 /* Modes  */
 #define PASSWORD_HASHING_MODE 0
