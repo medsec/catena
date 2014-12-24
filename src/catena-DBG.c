@@ -132,4 +132,5 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda,
   }
   memcpy(h, r + idx(0,c-1,co,c,m) * H_LEN, H_LEN);
   free(r);
+  free(tmp);
 }
