@@ -111,7 +111,6 @@ void clmul64(uint64_t a, uint64_t b, uint64_t* r){
     //Repair
     uint64_t m = 0xEEEEEEEEEEEEEEEE; //s=4 => 16 times 1110
     for(i = 1 ; i < s ; i++){
-        //a = (a << 1) & m;
         tmp = ((a & m) >> i);
         m &= m << 1; //shift mask to exclude all bit j': j' mod s = i
         ifmask = -((b >> (64-i)) & 1); //if the (64-i)th bit of b is 1
