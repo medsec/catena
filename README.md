@@ -28,5 +28,4 @@ can be enabled by appending FULLHASH=1 to the make invocation. Like this:
 Dependencies
 ------------
 * gcc     (http://gcc.gnu.org/)
-* openssl (http://www.openssl.org/)
 * make    (http://www.gnu.org/software/make/)
