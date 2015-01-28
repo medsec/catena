@@ -19,7 +19,7 @@ int main()
   const uint8_t salt[SALT_LEN]=
     {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
      0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0XFF};
-  const char *password = "Password";
+  uint8_t password[] = "Password";
   const char *data     = "I'm a header";
   const uint8_t lambda = LAMBDA;
 #ifdef CATENA_INFO
@@ -49,7 +49,7 @@ int main()
 
   memset(hash1,0,H_LEN);
 
-  Catena((uint8_t *) password, strlen(password) ,salt, SALT_LEN,
+  Catena(password, strlen((char *)password) ,salt, SALT_LEN,
 	 (uint8_t *) data, strlen(data), lambda, min_garlic, garlic,
 	 hashlen, hash1);
   print_hex(hash1, hashlen);
