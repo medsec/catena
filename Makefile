@@ -1,15 +1,12 @@
 
-all: blake2b sha512
+all: blake2b
 
 blake2b:
 	cd src; make $@; cd 
 
-sha512:
-	cd src; make $@; cd ..
-
 clean:
 	cd src;	make clean; cd ..
-	rm -f *~ catena-BRG-blake2b-test catena-BRG-sha512-test 
-	rm -f catena-DBG-blake2b-test catena-DBG-sha512-test 
-	rm -f catena-BRG-blake2b-test_vectors catena-BRG-sha512-test_vectors 
-	rm -f catena-DBG-blake2b-test_vectors catena-DBG-sha512-test_vectors 
+	rm -f *~ catena-Dragonfly-blake2b-test
+	rm -f catena-Butterfly-blake2b-test
+	rm -f catena-Dragonfly-blake2b-test_vectors
+	rm -f catena-Butterfly-blake2b-test_vectors

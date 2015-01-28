@@ -1,18 +1,15 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "catena.h"
 #include "hash.h"
+#include "catena-helpers.h"
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif 
-
-#ifdef GFMUL
-#include "gfhash.h"
-#endif
-
-#include <stdio.h>
-
+// Default values for Catena-Butterfly
+const uint8_t VERSION_ID[] = "Butterfly";
+const uint8_t LAMBDA = 3;
+const uint8_t GARLIC = 14;
+const uint8_t MIN_GARLIC = 14;
 
 /*  Sigma function that defines the diagonal connections of a DBG
 *	diagonal front: flip the (g-i)th bit (Inverse Buttferly Graph)
@@ -26,28 +23,6 @@ uint64_t sigma(const uint8_t g, const uint64_t i, const uint64_t j)
   else{
     return (j ^ (UINT64_C(1) << (i-(g-1)))); //diagonal back
   }
-}
-
-
-/* Writes the XOR of the H_LEN long sequences input1 and input2  to output
-* Uses Intrinsic to speed up computation when SSE2 is avaiable
-*/
-void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
-{
-#ifdef __SSE2__
-  int blocks = H_LEN/sizeof(__m128i);
-  for(int i = 0; i < blocks; i++){
-    __m128i left = _mm_load_si128((__m128i*) (input1 + (i*sizeof(__m128i))));
-    __m128i right = _mm_load_si128((__m128i*) (input2 + (i*sizeof(__m128i))));
-    __m128i result = _mm_xor_si128 (left,right);
-    _mm_store_si128((__m128i*) (output + (i*sizeof(__m128i))), result);
-  }
-#else
-  uint16_t i;
-  for(i = 0; i < H_LEN; i++){
-    output[i] = input1[i] ^ input2[i];
-  }
-#endif
 }
 
 
@@ -71,25 +46,11 @@ uint64_t idx(uint16_t i, uint64_t j, uint8_t co, uint64_t c, uint32_t m){
 }
 
 
-/* Hash function used to create vertices defaults to __Hash2
- * When GFMUL is enabled, it uses gfhash for every odd row
- */
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-void H(uint16_t i, uint8_t * source1, uint8_t * source2, uint8_t* target){
-#ifdef GFMUL
-  if((i % 2) == 1)
-    gfhash(source1,source2,target);
-  else
-#endif
-    __Hash2(source1, H_LEN, source2, H_LEN, target);
-}
-
-
 /* Computes the hash of x using a Double Butterfly Graph,
 * that forms as (2^g,\lamba)-Superconcentrator
 */
-void F(const uint8_t x[H_LEN], const uint8_t lambda,
-    const uint8_t garlic,   uint8_t h[H_LEN])
+void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
+  const uint8_t *salt, const uint8_t saltlen, uint8_t h[H_LEN])
 {
   const uint64_t c = UINT64_C(1) << garlic;
   const uint32_t m = UINT32_C(1) << (garlic-1);
@@ -97,7 +58,7 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda,
 
   uint8_t *r = malloc((c+m)*H_LEN);
   uint8_t *tmp = malloc(H_LEN);
-
+  union v8_v64 s;
   uint16_t i;
   uint64_t j;
   uint8_t k;
@@ -105,26 +66,43 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda,
 
 
   //top row
-  __Hash1(x, H_LEN, r);
-  for(j = 1; j < c; j++){
-    __Hash1(r + (j-1)*H_LEN, H_LEN, r + j*H_LEN);
+  __Hash2(x, H_LEN, ZERO8, H_LEN, r); //v_0 <- H(x||0)
+  __Hash2(r, H_LEN, x, H_LEN, r+H_LEN); //v_1 <- H'(v_0|x) //Todo: H'
+  for(j = 2; j < c; j++){
+    __Hash2(r + (j-1)*H_LEN, H_LEN, r + (j-2)*H_LEN, H_LEN, r + j*H_LEN); //Todo: H'
   }
 
-  //iterations
+  /*Gamma Function*/
+  __Hash1(salt, saltlen, s.v8);
+  XOR(r + (c-1)*H_LEN, r, tmp); //tmp = v_(2^g-1) XOR v_0
+  //v_0 = H(tmp||v_(S[0]))
+  __Hash2(tmp, H_LEN, r + jwndw(s.v64,0,garlic) * H_LEN, H_LEN, r); 
+  for(i = 1; i < c; i++){
+    j = i % ((H_LEN*8)/garlic);
+    if(j == 0){
+      __Hash1(s.v8, H_LEN, s.v8);
+    }
+    XOR(r + (i-1)*H_LEN, r + i*H_LEN, tmp); //tmp = v_(i-1) XOR v_i
+    __HashFast(i, tmp, r + jwndw(s.v64,j,garlic) * H_LEN, r); //v_i= H'(tmp||v_(S[j]))
+  }
+
+
+  /* DBH */
   for (k = 0; k < lambda; k++) {
     //rows
     for(i=1; i < l; i++){
       //tmp:= v2^g-1 XOR v0
-      XOR(r + idx(i-1,0,co,c,m) * H_LEN, r + idx(i-1,c-1,co,c,m)*H_LEN, tmp);
+      XOR(r + idx(i-1,c-1,co,c,m)*H_LEN, r + idx(i-1,0,co,c,m)*H_LEN, tmp);
       //r0 := H(tmp || vsigma(g,i-1,0) )
-      H(i, tmp, r + idx(i-1,sigma(garlic,i-1,0),co,c,m) * H_LEN,
-        r + idx(i,0,co,c,m) *H_LEN);
+      __Hash2(tmp, H_LEN, r+idx(i-1,sigma(garlic,i-1,0),co,c,m) * H_LEN, H_LEN,
+        r+idx(i,0,co,c,m) *H_LEN);
+      __ResetState();
       //vertices
       for(j = 1; j < c; j++){
-        //tmp:= ri-1 XOR vi
-        XOR(r + idx(i-1,j,co,c,m) * H_LEN, r + idx(i,j-1,co,c,m)*H_LEN, tmp);
-        //ri := H(tmp || vsigma(g,i-1,j))
-        H(i, tmp, r + idx(i-1,sigma(garlic,i-1,j),co,c,m) * H_LEN,
+        //tmp:= rj-1 XOR vj
+        XOR(r + idx(i,j-1,co,c,m)*H_LEN, r + idx(i-1,j,co,c,m) * H_LEN, tmp);
+        //rj := H(tmp || vsigma(g,i-1,j))
+        __HashFast(j, tmp, r + idx(i-1,sigma(garlic,i-1,j),co,c,m) * H_LEN,
           r + idx(i,j,co,c,m) * H_LEN);
       }
     }

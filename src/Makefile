@@ -15,73 +15,48 @@ endif
 
 # Enable all possible SSE levels
 SSE_TAGS = $(shell /bin/grep -m 1 flags /proc/cpuinfo | /bin/grep -o \
-	'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5' | sed  's/\_/./g')
+	'sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5' | sed  's/\_/./g')
 
 ifneq (${SSE_TAGS},) 
     CFLAGS += -mfpmath=sse
     CFLAGS += $(foreach tag,$(SSE_TAGS),-m$(tag))
 endif
 
-BASEFILES = catena.c
-#if specified use the gfmul tweak
-ifdef GFMUL
-	CFLAGS += -DGFMUL
-	BASEFILES += gfhash.c
-	#test for pclmulqdq
-	PCMUL_TAG = $(shell /bin/grep -m 1 flags /proc/cpuinfo | /bin/grep -o \
-		pclmulqdq)
-	ifneq (${PCMUL_TAG},)
-		CFLAGS += -mpclmul
-	endif
+BASEFILES = catena.c catena-helpers.c
+
+#if requested use the full hash function for H' instead of single rounds
+ifndef FULLHASH
+	CFLAGS += -DFAST
 endif
 
+.PHONY: all blake2b Butterfly Dragonfly catena
 
-all: blake2b sha512
+all: blake2b catena
 
-blake2b: catena-BRG-blake2b-test catena-BRG-blake2b-test_vectors catena-DBG-blake2b-test catena-DBG-blake2b-test_vectors 
-sha512: catena-BRG-sha512-test catena-BRG-sha512-test_vectors catena-DBG-sha512-test catena-DBG-sha512-test_vectors
-DBG: catena-DBG-blake2b-test catena-DBG-blake2b-test_vectors catena-DBG-sha512-test catena-DBG-sha512-test_vectors
-BRG: catena-BRG-blake2b-test catena-BRG-blake2b-test_vectors catena-BRG-sha512-test catena-BRG-sha512-test_vectors
-catena: catena-DBG catena-BRG
+blake2b: catena-Dragonfly-blake2b-test catena-Dragonfly-blake2b-test_vectors catena-Butterfly-blake2b-test catena-Butterfly-blake2b-test_vectors 
+Butterfly: catena-Butterfly-blake2b-test catena-Butterfly-blake2b-test_vectors
+Dragonfly: catena-Dragonfly-blake2b-test catena-Dragonfly-blake2b-test_vectors
+catena: catena-BRG catena-DBG
 
-catena-DBG-blake2b-test:
+catena-Butterfly-blake2b-test:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ test-catena.c $(BASEFILES) catena-blake2b.c catena-DBG.c $(HASH)
 
 
-catena-DBG-blake2b-test_vectors:
+catena-Butterfly-blake2b-test_vectors:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ catena_test_vectors.c $(BASEFILES) catena-blake2b.c catena-DBG.c $(HASH)
 
-
-catena-DBG-sha512-test:
-	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ test-catena.c $(BASEFILES) catena-sha512.c catena-DBG.c -lssl -lcrypto
-
-
-catena-DBG-sha512-test_vectors:
-	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ catena_test_vectors.c $(BASEFILES) catena-sha512.c catena-DBG.c -lssl -lcrypto
-
 catena-DBG:
-	$(CC) $(CFLAGS) -c $@.c $(HASH)
+	$(CC) $(CFLAGS) -c $(BASEFILES) catena-DBG.c $(HASH)
 
-
-
-catena-BRG-blake2b-test:
+catena-Dragonfly-blake2b-test:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ test-catena.c $(BASEFILES) catena-blake2b.c catena-BRG.c $(HASH)
 
 
-catena-BRG-blake2b-test_vectors:
+catena-Dragonfly-blake2b-test_vectors:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ catena_test_vectors.c $(BASEFILES) catena-blake2b.c catena-BRG.c $(HASH)
 
-
-catena-BRG-sha512-test:
-	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ test-catena.c $(BASEFILES) catena-sha512.c catena-BRG.c -lssl -lcrypto
-
-
-catena-BRG-sha512-test_vectors:
-	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ catena_test_vectors.c $(BASEFILES) catena-sha512.c catena-BRG.c -lssl -lcrypto
-
 catena-BRG:
-	$(CC) $(CFLAGS) -c $@.c $(HASH)
-
+	$(CC) $(CFLAGS) -c $(BASEFILES) catena-BRG.c $(HASH)
 
 clean:
 	rm -f  *~ *.o

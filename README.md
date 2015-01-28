@@ -11,26 +11,21 @@ http://eprint.iacr.org/2013/525
 
 Content
 -------
-* C reference implementation of Catena-blake2b 
-* C reference implementation of Catena-sha512 (depends on libssl and libcrypto)
+* C reference implementation of Catena-blake2b
 
 Instances
 -------
-* Catena-BRG
-* Catena-DBG
+* Catena-Dragonfly (formerly known as Catena-BRG)
+* Catena-Butterfly (formerly known as Catena-DBG)
 
 Tweaks
 -------
-A tweak for Catena-DBG can be enabled that replaces the hash function calls in 
-every second row by a Galois Field Multiplication. This alters the resulting 
-hashes and is not compatible with regular Catena-DBG. The tweak can be enabled
-by appending GFMUL=1 to the make invocation. Like this:
+A tweak that replaces the reduced hash function H' with the full hash function, 
+can be enabled by appending FULLHASH=1 to the make invocation. Like this:
 
-    make all GFMUL=1
+    make all FULLHASH=1
 
 Dependencies
 ------------
 * gcc     (http://gcc.gnu.org/)
-* openssl (http://www.openssl.org/)
 * make    (http://www.gnu.org/software/make/)
-
