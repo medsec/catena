@@ -8,17 +8,17 @@ void print_hex(const char *message, const uint8_t *x, const int len)
 {
   int i;
   puts(message);
-    for(i=0; i< len; i++)
-      {
-	if((i!=0) && (i%8 == 0)) puts("");
-	printf("%02x ",x[i]);
-      }
-    printf("     %d (octets)\n\n", len);
+  for(i=0; i< len; i++)
+  {
+    if((i!=0) && (i%8 == 0)) puts("");
+    printf("%02x ",x[i]);
+  }
+  printf("     %d (octets)\n\n", len);
 }
 
 /*******************************************************************/
 
-void test_output(const uint8_t *pwd,   const uint32_t pwdlen,
+void test_output(uint8_t *pwd,   const uint32_t pwdlen,
 		 const uint8_t *salt,  const uint8_t saltlen,
 		 const uint8_t *data,  const uint32_t datalen,
 		 const uint8_t garlic, const uint8_t hashlen)
