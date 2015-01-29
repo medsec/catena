@@ -14,9 +14,6 @@ extern const uint8_t LAMBDA;
 extern const uint8_t GARLIC;
 extern const uint8_t MIN_GARLIC;
 extern const uint8_t VERSION_ID[];
-// #define LAMBDA      3
-// #define GARLIC     14
-// #define MIN_GARLIC 14
 
 /* Modes  */
 #define PASSWORD_HASHING_MODE 0
@@ -24,7 +21,7 @@ extern const uint8_t VERSION_ID[];
 #define REGULAR 0
 #define CLIENT 1
 
-/*F function of Catena. Possible instantiations:
+/*tabula(formerly F) function of Catena. Possible instantiations:
 *	-Catena-BRG using a Bit-Reversal Graph
 * 	-Catena-DBG using a Double-Butterfly Graph
 */

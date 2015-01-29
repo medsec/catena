@@ -11,6 +11,7 @@
 #endif 
 
 #include "catena.h"
+#include "catena-helpers.h"
 #include "hash.h"
 
 #ifdef ARC_BIG_ENDIAN
@@ -54,12 +55,14 @@ int __Catena(uint8_t *pwd,   const uint32_t pwdlen,
   __Hash1((uint8_t *) data, datalen,x);
 
   /* Compute the initial value to hash  */
-  __Hash5(hv, H_LEN, t, 4, x, H_LEN, (uint8_t *)pwd,  pwdlen, salt, saltlen, x);
+  __Hash5(hv, H_LEN, t, 4, x, H_LEN, pwd,  pwdlen, salt, saltlen, x);
 
-  /* Delete pwd */
-  memset(pwd, 0, pwdlen);
-  *(volatile uint8_t*)pwd= *(volatile uint8_t*)pwd; //ensure memset is executed
-  
+  /* Overwrite pwd if possible*/
+  if(is_writeable(pwd)){
+    memset((char *)pwd, 0, pwdlen);
+    *(volatile uint8_t*)pwd= *(volatile uint8_t*)pwd;//ensure memset is executed    
+  }
+
   F(x, lambda, (min_garlic+1)/2, salt, saltlen, x);
 
   for(c=min_garlic; c <= garlic; c++)
@@ -236,11 +239,7 @@ void Catena_Keyed_Hashing(uint8_t *pwd,   const uint32_t pwdlen,
 int PHS(void *out, size_t outlen,  const void *in, size_t inlen,
 	   const void *salt, size_t saltlen, unsigned int t_cost,
 	   unsigned int m_cost) {
-
-  uint8_t pwd[inlen];
-  memcpy(pwd, in, inlen); //copy in so we can "delete" it
-
-  return __Catena(pwd, inlen, salt, saltlen, (const uint8_t *)
+  return __Catena((uint8_t * )in, inlen, salt, saltlen, (const uint8_t *)
 		  "", 0, t_cost, m_cost, m_cost, outlen, REGULAR,
 		  PASSWORD_HASHING_MODE, out);
 }

@@ -21,4 +21,9 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output);
  */
 uint64_t jwndw(uint64_t* S, uint64_t j, uint8_t g);
 
+
+/* Determines if p is writeable by reading from /dev/zero. Hacky but should work
+ */
+int is_writeable(void *p);
+
 #endif
