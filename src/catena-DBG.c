@@ -65,11 +65,12 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   uint8_t co = 0; //carry over from last iteration
 
 
-  //top row
+  /* Top row */
   __Hash2(x, H_LEN, ZERO8, H_LEN, r); //v_0 <- H(x||0)
-  __Hash2(r, H_LEN, x, H_LEN, r+H_LEN); //v_1 <- H'(v_0|x) //Todo: H'
-  for(j = 2; j < c; j++){
-    __Hash2(r + (j-1)*H_LEN, H_LEN, r + (j-2)*H_LEN, H_LEN, r + j*H_LEN); //Todo: H'
+  __ResetState();
+  __HashFast(1, r, x, r+H_LEN); //v_1 <- H'(v_0||x)
+  for(i = 2; i < c; i++){
+    __HashFast(i, r + (i-1)*H_LEN, r + (i-2)*H_LEN, r + i*H_LEN);
   }
 
   /*Gamma Function*/
@@ -85,7 +86,6 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
     XOR(r + (i-1)*H_LEN, r + i*H_LEN, tmp); //tmp = v_(i-1) XOR v_i
     __HashFast(i, tmp, r + jwndw(s.v64,j,garlic) * H_LEN, r); //v_i= H'(tmp||v_(S[j]))
   }
-
 
   /* DBH */
   for (k = 0; k < lambda; k++) {
