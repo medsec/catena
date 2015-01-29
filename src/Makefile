@@ -15,7 +15,7 @@ endif
 
 # Enable all possible SSE levels
 SSE_TAGS = $(shell /bin/grep -m 1 flags /proc/cpuinfo | /bin/grep -o \
-	'sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5' | sed  's/\_/./g')
+	'sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2' | sed  's/\_/./g')
 
 ifneq (${SSE_TAGS},) 
     CFLAGS += -mfpmath=sse
