@@ -48,18 +48,3 @@ uint64_t jwndw(uint64_t* S, uint64_t j, uint8_t g){
 	}
 	return result;
 }
-
-// see http://stackoverflow.com/a/14437277/507005
-int is_writeable(void *p)
-{
-    int fd = open("/dev/zero", O_RDONLY);
-    int writeable;
-
-    if (fd < 0)
-        return -1; /* Should not happen */
-
-    writeable = read(fd, p, 1) == 1;
-    close(fd);
-
-    return writeable;
-}
