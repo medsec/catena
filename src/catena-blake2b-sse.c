@@ -1,10 +1,10 @@
 #include "catena.h"
-#include "blake2/blake2.h"
+#include "blake2-sse/blake2.h"
 #include "hash.h"
 
-#include "blake2/blake2-config.h"
-#include "blake2/blake2b-round.h"
-#include "blake2/blake2-impl.h"
+#include "blake2-sse/blake2-config.h"
+#include "blake2-sse/blake2b-round.h"
+#include "blake2-sse/blake2-impl.h"
 
 #include <emmintrin.h>
 #if defined(HAVE_SSSE3)
