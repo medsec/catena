@@ -67,7 +67,7 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
 
   /* Top row */
   memcpy(tmp, x, H_LEN);
-  tmp[0] ^= 1;
+  tmp[H_LEN-1] ^= 1;
   __Hash2(x, H_LEN, tmp, H_LEN, r); //v_0 <- H(x||xXOR1)
   __ResetState();
   __HashFast(1, r, x, r+H_LEN); //v_1 <- H'(v_0||x)
