@@ -33,7 +33,7 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   uint8_t *tmp = malloc(H_LEN);
   union v8_v64 s;
   uint64_t i = 0, j = 0;
-  uint32_t k;
+  uint8_t k;
 
   __Hash1(x, H_LEN, r);
 
@@ -49,7 +49,7 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   __Hash1(salt, saltlen, s.v8);
   XOR(r + (c-1)*H_LEN, r, tmp); //tmp = v_(2^g-1) XOR v_0
   //v_0 = H(tmp||v_(S[0]))
-  __Hash2(tmp, H_LEN, r + jwndw(s.v64,0,garlic) * H_LEN, H_LEN, r); 
+  __Hash2(tmp, H_LEN, r + jwndw(s.v64,0,garlic) * H_LEN, H_LEN, r);
   __ResetState();
   for(i = 1; i < c; i++){
     j = i % ((H_LEN*8)/garlic);

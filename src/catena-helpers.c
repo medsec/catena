@@ -7,7 +7,7 @@
 
 #include "catena-helpers.h"
 
-const uint8_t ZERO8[H_LEN/sizeof(uint8_t)] = {0}; //H_LEN 0s
+const uint8_t ZERO8[H_LEN] = {0}; //H_LEN 0s
 
 
 void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
@@ -21,7 +21,7 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
     _mm_store_si128((__m128i*) (output + (i*sizeof(__m128i))), result);
   }
 #else
-  uint16_t i;
+  uint32_t i;
   for(i = 0; i < H_LEN; i++){
     output[i] = input1[i] ^ input2[i];
   }
@@ -30,9 +30,9 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
 
 
 uint64_t jwndw(uint64_t* S, uint64_t j, uint8_t g){
-	uint8_t w = (j*g)/64; //index of (first) word
-	uint8_t start = j*g % 64; //as bit index
-	uint8_t end = ((j+1) * g - 1) % 64;
+	uint32_t w = (j*g)/64; //index of (first) word
+	uint32_t start = j*g % 64; //as bit index
+	uint32_t end = ((j+1) * g - 1) % 64;
 	uint64_t result;
 	/* garlic can't exceed 63 so start > end means we crossed a word boundary
 	 * start = end can occur when garlic = 1
