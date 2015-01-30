@@ -8,8 +8,8 @@
 // Default values for Catena-Dragonfly
 const uint8_t VERSION_ID[] = "Dragonfly";
 const uint8_t LAMBDA = 2;
-const uint8_t GARLIC = 20;
-const uint8_t MIN_GARLIC = 20;
+const uint8_t GARLIC = 21;
+const uint8_t MIN_GARLIC = 21;
 
 /* Return the reverse bit order of x where x is interpreted as n-bit value */
 uint64_t reverse(uint64_t x, const uint8_t n)
