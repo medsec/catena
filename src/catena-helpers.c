@@ -30,9 +30,9 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
 
 
 uint64_t jwndw(uint64_t* S, uint64_t j, uint8_t g){
-	uint32_t w = (j*g)/64; //index of (first) word
-	uint32_t start = j*g % 64; //as bit index
-	uint32_t end = ((j+1) * g - 1) % 64;
+	uint64_t w = (j*g)/64; //index of (first) word
+	uint8_t start =  (j*g) % 64; //as bit index
+	uint8_t end =    ((j+1) * g - 1) % 64;
 	uint64_t result;
 	/* garlic can't exceed 63 so start > end means we crossed a word boundary
 	 * start = end can occur when garlic = 1
