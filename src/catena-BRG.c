@@ -31,14 +31,16 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   const uint64_t c = UINT64_C(1) << garlic;
   uint8_t *r = malloc(c*H_LEN);
   uint8_t *tmp = malloc(H_LEN);
-  union v8_v64 s;
-  uint64_t i = 0, j = 0;
+  uint8_t *tmp2 = malloc(H_LEN);
+  uint64_t i, j;
   uint8_t k;
 
   __Hash1(x, H_LEN, r);
 
   /* Top row */
-  __Hash2(x, H_LEN, ZERO8, H_LEN, r); //v_0 <- H(x||0)
+  memcpy(tmp, x, H_LEN);
+  tmp[0] ^= 1;
+  __Hash2(x, H_LEN, tmp, H_LEN, r); //v_0 <- H(x||xXOR1)
   __ResetState();
   __HashFast(1, r, x, r+H_LEN); //v_1 <- H'(v_0||x)
   for(i = 2; i < c; i++){
@@ -46,20 +48,21 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   }
 
   /*Gamma Function*/
-  __Hash1(salt, saltlen, s.v8);
+  __Hash1(salt, saltlen, tmp);  //tmp <- H(S)
+  __Hash1(tmp, H_LEN, tmp2);    //tmp2 <- H(H(S))
+  initXSState(tmp, tmp2);
+
+  j = xorshift1024star() >> (64 - garlic);
   XOR(r + (c-1)*H_LEN, r, tmp); //tmp = v_(2^g-1) XOR v_0
-  //v_0 = H(tmp||v_(S[0]))
-  __Hash2(tmp, H_LEN, r + jwndw(s.v64,0,garlic) * H_LEN, H_LEN, r);
+  __Hash2(tmp, H_LEN, r + j * H_LEN, H_LEN, r); //v_0 = H(tmp||v_(S[0]))
   __ResetState();
   for(i = 1; i < c; i++){
-    j = i % ((H_LEN*8)/garlic);
-    if(j == 0){
-      __Hash1(s.v8, H_LEN, s.v8);
-    }
-    XOR(r + (i-1)*H_LEN, r + i*H_LEN, tmp); //tmp = v_(i-1) XOR v_i
-    __HashFast(i, tmp, r + jwndw(s.v64,j,garlic) * H_LEN, r); //v_i= H'(tmp||v_(S[j]))
-  }
+    j = xorshift1024star() >> (64 - garlic);
 
+    XOR(r + (i-1)*H_LEN, r + i*H_LEN, tmp); //tmp = v_(i-1) XOR v_i
+    __HashFast(i, tmp, r + j * H_LEN, r); //v_i= H'(tmp||v_(S[j]))
+  }
+  
   /* BRH */
   for (k = 0; k < lambda; k++) {
     __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);

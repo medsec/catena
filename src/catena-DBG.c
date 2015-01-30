@@ -53,20 +53,21 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   const uint8_t *salt, const uint8_t saltlen, uint8_t h[H_LEN])
 {
   const uint64_t c = UINT64_C(1) << garlic;
-  const uint64_t m = UINT64_C(1) << (garlic-1);
+  const uint64_t m = UINT64_C(1) << (garlic-1); //0.5 * 2^g
   const uint32_t l = 2 * garlic;
 
   uint8_t *r   = malloc((c+m)*H_LEN);
   uint8_t *tmp = malloc(H_LEN);
-  union v8_v64 s;
-  uint64_t i;
-  uint64_t j;
+  uint8_t *tmp2 = malloc(H_LEN);
+  uint64_t i,j;
   uint8_t k;
   uint8_t co = 0; //carry over from last iteration
 
 
   /* Top row */
-  __Hash2(x, H_LEN, ZERO8, H_LEN, r); //v_0 <- H(x||0)
+  memcpy(tmp, x, H_LEN);
+  tmp[0] ^= 1;
+  __Hash2(x, H_LEN, tmp, H_LEN, r); //v_0 <- H(x||xXOR1)
   __ResetState();
   __HashFast(1, r, x, r+H_LEN); //v_1 <- H'(v_0||x)
   for(i = 2; i < c; i++){
@@ -74,20 +75,19 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   }
 
   /*Gamma Function*/
-  __Hash1(salt, saltlen, s.v8);
+  __Hash1(salt, saltlen, tmp);  //tmp <- H(S)
+  __Hash1(tmp, H_LEN, tmp2);    //tmp2 <- H(H(S))
+  initXSState(tmp, tmp2);
+
+  j = xorshift1024star() >> (64 - garlic);
   XOR(r + (c-1)*H_LEN, r, tmp); //tmp = v_(2^g-1) XOR v_0
-
-  //v_0 = H(tmp||v_(S[0]))
-  __Hash2(tmp, H_LEN, r + jwndw(s.v64,0,garlic) * H_LEN, H_LEN, r);
+  __Hash2(tmp, H_LEN, r + j * H_LEN, H_LEN, r); //v_0 = H(tmp||v_(S[0]))
   __ResetState();
-
   for(i = 1; i < c; i++){
-    j = i % ((H_LEN*8)/garlic);
-    if(j == 0){
-      __Hash1(s.v8, H_LEN, s.v8);
-    }
+    j = xorshift1024star() >> (64 - garlic);
+
     XOR(r + (i-1)*H_LEN, r + i*H_LEN, tmp); //tmp = v_(i-1) XOR v_i
-    __HashFast(i, tmp, r + jwndw(s.v64,j,garlic) * H_LEN, r); //v_i= H'(tmp||v_(S[j]))
+    __HashFast(i, tmp, r + j * H_LEN, r); //v_i= H'(tmp||v_(S[j]))
   }
 
   /* DBH */
@@ -104,11 +104,11 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
 
       //vertices
       for(j = 1; j < c; j++){
-	//tmp:= rj-1 XOR vj
-	XOR(r + idx(i,j-1,co,c,m)*H_LEN, r + idx(i-1,j,co,c,m) * H_LEN, tmp);
-	//rj := H(tmp || vsigma(g,i-1,j))
-	__HashFast(j, tmp, r + idx(i-1,sigma(garlic,i-1,j),co,c,m) * H_LEN,
-		   r + idx(i,j,co,c,m) * H_LEN);
+        //tmp:= rj-1 XOR vj
+        XOR(r + idx(i,j-1,co,c,m)*H_LEN, r + idx(i-1,j,co,c,m) * H_LEN, tmp);
+        //rj := H(tmp || vsigma(g,i-1,j))
+        __HashFast(j, tmp, r + idx(i-1,sigma(garlic,i-1,j),co,c,m) * H_LEN,
+		        r + idx(i,j,co,c,m) * H_LEN);
       }
     }
     co = (co + (i-1)) % 3;
