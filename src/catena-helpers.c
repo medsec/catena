@@ -29,22 +29,21 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
 }
 
 
-uint64_t jwndw(uint64_t* S, uint64_t j, uint8_t g){
-	uint64_t w = (j*g)/64; //index of (first) word
-	uint8_t start =  (j*g) % 64; //as bit index
-	uint8_t end =    ((j+1) * g - 1) % 64;
-	uint64_t result;
-	/* garlic can't exceed 63 so start > end means we crossed a word boundary
-	 * start = end can occur when garlic = 1
-	 */
-	if(start <= end){	//window is part of only one word
-		result = S[w] << (63 - end);
-		result >>= (63 - (g-1));
-	}
-	else{ //window crosses word boundaries into next word
-		result = S[w+1] << (63-end);
-		result >>= (63 - (g-1));
-		result ^= S[w] >> start; //add remaining bits from lower word
-	}
-	return result;
+//see: http://en.wikipedia.org/wiki/Xorshift#Variations
+static int p;
+static int s[16];
+
+void initXSState(const uint8_t* a, const uint8_t* b){
+	p = 0;
+	memcpy(s, a, H_LEN);
+	memcpy(&s[8], b, H_LEN);
+}
+
+uint64_t xorshift1024star() {
+	uint64_t s0 = s[ p ];
+	uint64_t s1 = s[ p = (p+1) & 15 ];
+	s1 ^= s1 << 31; // a
+	s1 ^= s1 >> 11; // b
+	s0 ^= s0 >> 30; // c
+	return ( s[p] = s0 ^ s1 ) * UINT64_C(1181783497276652981);
 }

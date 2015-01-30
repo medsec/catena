@@ -16,9 +16,12 @@ union v8_v64
 */
 void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output);
 
-
-/* Extracts the j-th least significat g-bit window from S
+/* Init the state for Xorshift with two 512bit values
  */
-uint64_t jwndw(uint64_t* S, uint64_t j, uint8_t g);
+void initXSState(const uint8_t* a, const uint8_t* b);
+
+/*  Xorshift RNG with a 1024bit state that must be seeded first.
+ */
+uint64_t xorshift1024star();
 
 #endif
