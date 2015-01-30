@@ -31,7 +31,7 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
 
 //see: http://en.wikipedia.org/wiki/Xorshift#Variations
 static int p;
-static int s[16];
+static uint64_t s[16];
 
 void initXSState(const uint8_t* a, const uint8_t* b){
 	p = 0;
