@@ -21,11 +21,11 @@ extern const uint8_t VERSION_ID[];
 #define REGULAR 0
 #define CLIENT 1
 
-/*tabula(formerly F) function of Catena. Possible instantiations:
+/*Flap function of Catena. Possible instantiations:
 *	-Catena-BRG using a Bit-Reversal Graph
 * 	-Catena-DBG using a Double-Butterfly Graph
 */
-void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic, 
+void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic, 
 	const uint8_t *salt, const uint8_t saltlen, uint8_t h[H_LEN]);
 
 /* Returns -1 if an an error occurred, otherwise 0. */
