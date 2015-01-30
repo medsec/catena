@@ -25,7 +25,7 @@ uint64_t reverse(uint64_t x, const uint8_t n)
 }
 
 /* This function computes the  \lambda-BRH of x. */
-void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
+void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   const uint8_t *salt, const uint8_t saltlen, uint8_t h[H_LEN])
 {
   const uint64_t c = UINT64_C(1) << garlic;
@@ -54,7 +54,7 @@ void F(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   initXSState(tmp, tmp2);
 
   __ResetState();
-  for(i = 1; i < q; i++){
+  for(i = 0; i < q; i++){
     j = xorshift1024star() >> (64 - garlic);
     j2 = xorshift1024star() >> (64 - garlic);
     //v_j1= H'(v_j1||v_j2)

@@ -57,11 +57,11 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
   /* Compute the initial value to hash  */
   __Hash5(hv, H_LEN, t, 4, x, H_LEN, pwd,  pwdlen, salt, saltlen, x);
 
-  F(x, lambda, (min_garlic+1)/2, salt, saltlen, x);
+  Flap(x, lambda, (min_garlic+1)/2, salt, saltlen, x);
 
   for(c=min_garlic; c <= garlic; c++)
   {
-      F(x, lambda, c, salt, saltlen, x);
+      Flap(x, lambda, c, salt, saltlen, x);
       if( (c==garlic) && (client == CLIENT))
       {
         memcpy(hash, x, H_LEN);
@@ -161,7 +161,7 @@ void CI_Update(const uint8_t *old_hash,  const uint8_t lambda,
 
   for(c=old_garlic+1; c <= new_garlic; c++)
     {
-      F(x, lambda, c, salt, saltlen, x);
+      Flap(x, lambda, c, salt, saltlen, x);
       __Hash2(&c,1,x, H_LEN, x);
       memset(x+hashlen, 0, H_LEN-hashlen);
     }
