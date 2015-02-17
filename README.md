@@ -7,8 +7,7 @@ Furthermore, Catena provides resistance against cache-timing attacks, since
 its memory-access pattern is password-independent.
 
 Academic paper:
-<a href="http://www.uni-weimar.de/fileadmin/user/fak/medien/professuren/Mediensicherheit/Research/Publications/catena-v3.0.pdf"
->catena-v3.0.pdf</a>
+<a href="http://www.uni-weimar.de/fileadmin/user/fak/medien/professuren/Mediensicherheit/Research/Publications/catena-v3.0.pdf">catena-v3.0.pdf</a>
 
 Content
 -------
