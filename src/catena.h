@@ -29,7 +29,7 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
 	const uint8_t *salt, const uint8_t saltlen, uint8_t h[H_LEN]);
 
 /* Returns -1 if an an error occurred, otherwise 0. */
-int Catena(const uint8_t *pwd,   const uint32_t pwdlen,
+int Catena(uint8_t *pwd,   const uint32_t pwdlen,
 	   const uint8_t *salt,  const uint8_t  saltlen,
 	   const uint8_t *data,  const uint32_t datalen,
 	   const uint8_t lambda, const uint8_t  min_garlic,
@@ -40,12 +40,12 @@ int Catena(const uint8_t *pwd,   const uint32_t pwdlen,
  * are all null-terminated string.
  * Returns -1 if an an error occurred, otherwise 0.
  */
-int Naive_Catena(const char *pwd,  const char *salt, const char *data,
+int Naive_Catena(char *pwd,  const char *salt, const char *data,
 		 uint8_t hash[H_LEN]);
 
 
 /* Returns -1 if an an error occurred, otherwise 0. */
-int Simple_Catena(const uint8_t *pwd,   const uint32_t pwdlen,
+int Simple_Catena(uint8_t *pwd,   const uint32_t pwdlen,
 		   const uint8_t *salt,  const uint8_t  saltlen,
 		   const uint8_t *data,  const uint32_t datalen,
 		   uint8_t hash[H_LEN]);
@@ -54,7 +54,7 @@ int Simple_Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 /* Expensive and memory consuming  password hashing part.
  * Returns -1 if an an error occurred, otherwise 0.
  */
-int Catena_Client(const uint8_t *pwd,   const uint32_t pwdlen,
+int Catena_Client(uint8_t *pwd,   const uint32_t pwdlen,
 		  const uint8_t *salt,  const uint8_t  saltlen,
 		  const uint8_t *data,  const uint32_t datalen,
 		  const uint8_t lambda, const uint8_t  min_garlic,
@@ -76,7 +76,7 @@ void CI_Update(const uint8_t *old_hash,  const uint8_t lambda,
 
 
 /* Mode of operation that derives a key from a password */
-void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
+void Catena_KG(uint8_t *pwd,   const uint32_t pwdlen,
 	       const uint8_t *salt,  const uint8_t saltlen,
 	       const uint8_t *data,  const uint32_t datalen,
 	       const uint8_t lambda, const uint8_t  min_garlic,
@@ -86,7 +86,7 @@ void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
 
 /* Encrypts the password hash with H(key || uuid || key) where
    key denots a KEY_LEN-byte key and uuid denots a *UNIQUE* user ID */
-void Catena_Keyed_Hashing(const uint8_t *pwd,   const uint32_t pwdlen,
+void Catena_Keyed_Hashing(uint8_t *pwd,   const uint32_t pwdlen,
 			  const uint8_t *salt,  const uint8_t  saltlen,
 			  const uint8_t *data,  const uint32_t datalen,
 			  const uint8_t lambda, const uint8_t  min_garlic,
@@ -95,9 +95,14 @@ void Catena_Keyed_Hashing(const uint8_t *pwd,   const uint32_t pwdlen,
 			  uint8_t *chash);
 
 
+//PHS requires the password to be const
+#ifndef OVERWRITE
+
 /* Returns -1 if an an error occurred, otherwise 0. */
 int PHS(void *out, size_t outlen,  const void *in, size_t inlen,
 	const void *salt, size_t saltlen, unsigned int t_cost,
 	unsigned int m_cost);
+
+#endif //end OVERWRITE
 
 #endif

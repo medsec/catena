@@ -27,7 +27,7 @@ void test_output(const uint8_t *pwd,   const uint32_t pwdlen,
   uint8_t hash[hashlen];
 
   uint8_t* pwdcpy = malloc(pwdlen);
-  memcpy(pwdcpy, pwd, pwdlen);
+  strncpy((char*)pwdcpy, (char*)pwd, pwdlen);
 
   Catena((uint8_t*)pwdcpy, pwdlen, salt, saltlen, data, datalen,
 	 LAMBDA, garlic, garlic, hashlen, hash);

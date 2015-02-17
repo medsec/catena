@@ -29,37 +29,15 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   const uint8_t *salt, const uint8_t saltlen, uint8_t h[H_LEN])
 {
   const uint64_t c = UINT64_C(1) << garlic;
-  const uint64_t q = UINT64_C(1) << ((3*garlic+3)/4);
   uint8_t *r = malloc(c*H_LEN);
-  uint8_t *tmp = malloc(H_LEN);
-  uint8_t *tmp2 = malloc(H_LEN);
-  uint64_t i, j, j2;
+  uint64_t i;
   uint8_t k;
 
-  __Hash1(x, H_LEN, r);
-
   /* Top row */
-  memcpy(tmp, x, H_LEN);
-  tmp[H_LEN-1] ^= 1;
-  __Hash2(x, H_LEN, tmp, H_LEN, r); //v_0 <- H(x||xXOR1)
-  __ResetState();
-  __HashFast(1, r, x, r+H_LEN); //v_1 <- H'(v_0||x)
-  for(i = 2; i < c; i++){
-    __HashFast(i, r + (i-1)*H_LEN, r + (i-2)*H_LEN, r + i*H_LEN);
-  }
+  initmem(x, c, r);
 
   /*Gamma Function*/
-  __Hash1(salt, saltlen, tmp);  //tmp <- H(S)
-  __Hash1(tmp, H_LEN, tmp2);    //tmp2 <- H(H(S))
-  initXSState(tmp, tmp2);
-
-  __ResetState();
-  for(i = 0; i < q; i++){
-    j = xorshift1024star() >> (64 - garlic);
-    j2 = xorshift1024star() >> (64 - garlic);
-    //v_j1= H'(v_j1||v_j2)
-    __HashFast(i, r + j * H_LEN, r + j2 * H_LEN, r + j * H_LEN); 
-  }
+  gamma(garlic, salt, saltlen, r);
 
   /* BRH */
   for (k = 0; k < lambda; k++) {
