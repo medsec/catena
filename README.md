@@ -27,12 +27,12 @@ Options
   official PHS interface, it is not available when this option is enabled. To 
   activate password overwriting append SAFE=1 to the invocation of make:
 
-    make all SAFE=1
+        make all SAFE=1
 
 * A tweak that replaces the reduced hash function H' with the full hash function,
   can be enabled by appending FULLHASH=1 to the invocation of make:
 
-    make all FULLHASH=1
+        make all FULLHASH=1
 
 Compiler
 --------
