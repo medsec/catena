@@ -242,7 +242,7 @@ void Catena_Keyed_Hashing(uint8_t *pwd,   const uint32_t pwdlen,
 int PHS(void *out, size_t outlen,  const void *in, size_t inlen,
 	   const void *salt, size_t saltlen, unsigned int t_cost,
 	   unsigned int m_cost) {
-  return __Catena((uint8_t * )in, inlen, salt, saltlen, (const uint8_t *)
+  return __Catena((const uint8_t * )in, inlen, salt, saltlen, (const uint8_t *)
 		  "", 0, t_cost, m_cost, m_cost, outlen, REGULAR,
 		  PASSWORD_HASHING_MODE, out);
 }
