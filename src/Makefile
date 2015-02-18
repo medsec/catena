@@ -1,27 +1,18 @@
-CC=gcc
+CC=clang
 TARGETDIR=../
 
-CFLAGS=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -s -W -Wall 
+CFLAGS=-fomit-frame-pointer -O3 -std=c99 -fgnu89-inline -march=native -s -W -Wall
+
+#Silence the warnings from blake2b
+CFLAGS+= -Wno-unused-function -Wno-unused-const-variable
 
 BASEFILES = catena.c catena-helpers.c
 
-
-
-#enable 64bit if avaiable
-ARCH := $(shell getconf LONG_BIT)
-
-ifeq ($(ARCH), 64)
-	CFLAGS += -m64
-endif
-
-#Determine possible SSE levels
+#Determine if SSE2 or greater is available
 SSE_TAGS = $(shell /bin/grep -m 1 flags /proc/cpuinfo | /bin/grep -o \
 	'sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2' | sed  's/\_/./g')
 
 ifneq (${SSE_TAGS},) 
-	#Enable SSE
-    CFLAGS += -mfpmath=sse
-    CFLAGS += $(foreach tag,$(SSE_TAGS),-m$(tag))
     #Choose optimized hash function
     HDIR=./blake2-sse
     CFLAGS += -L$(HDIR) -I$(HDIR)
@@ -35,40 +26,60 @@ else
 	HASHIMPL = catena-blake2b-ref.c
 endif
 
-
 #if requested use the full hash function for H' instead of single rounds
 ifndef FULLHASH
 	CFLAGS += -DFAST
 endif
 
-.PHONY: all blake2b Butterfly Dragonfly catena
+#if requested enable password overwriting and inform the user
+ifdef SAFE
 
-all: blake2b catena
+CFLAGS += -DOVERWRITE
 
-blake2b: catena-Dragonfly-blake2b-test catena-Dragonfly-blake2b-test_vectors catena-Butterfly-blake2b-test catena-Butterfly-blake2b-test_vectors 
-Butterfly: catena-Butterfly-blake2b-test catena-Butterfly-blake2b-test_vectors
-Dragonfly: catena-Dragonfly-blake2b-test catena-Dragonfly-blake2b-test_vectors
-catena: catena-BRG catena-DBG
+$(warning )
+$(warning Password overwriting is enabled. Please make sure the password)
+$(warning resides in a writeable part of the heap.)
+$(warning The PHS interface is not avaiable with this setting.)
+$(warning )
+
+else
+
+$(warning )
+$(warning )
+$(warning WARNING: PASSWORD OVERWRITING IS DISABLED)
+$(warning We strongly advise against doing this in a productive enviroment.)
+$(warning To enable password overwriting build with SAFE=1)
+$(warning )
+$(warning )
+
+endif
+
+
+.PHONY: all blake2b Butterfly Dragonfly
+
+all: blake2b
+
+blake2b: Butterfly-blake2b Dragonfly-blake2b
+
+Butterfly: Butterfly-blake2b	
+Dragonfly: Dragonfly-blake2b
+
+Butterfly-blake2b: catena-Butterfly-blake2b-test catena-Butterfly-blake2b-test_vectors
+Dragonfly-blake2b: catena-Dragonfly-blake2b-test catena-Dragonfly-blake2b-test_vectors
+
 
 catena-Butterfly-blake2b-test:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ test-catena.c $(BASEFILES) $(HASHIMPL) catena-DBG.c $(HASH)
 
-
 catena-Butterfly-blake2b-test_vectors:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ catena_test_vectors.c $(BASEFILES) $(HASHIMPL) catena-DBG.c $(HASH)
 
-catena-DBG:
-	$(CC) $(CFLAGS) -c $(BASEFILES) catena-DBG.c $(HASH)
 
 catena-Dragonfly-blake2b-test:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ test-catena.c $(BASEFILES) $(HASHIMPL) catena-BRG.c $(HASH)
 
-
 catena-Dragonfly-blake2b-test_vectors:
 	$(CC) $(CFLAGS) -o $(TARGETDIR)/$@ catena_test_vectors.c $(BASEFILES) $(HASHIMPL) catena-BRG.c $(HASH)
-
-catena-BRG:
-	$(CC) $(CFLAGS) -c $(BASEFILES) catena-BRG.c $(HASH)
 
 clean:
 	rm -f  *~ *.o

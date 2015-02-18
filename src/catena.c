@@ -6,10 +6,6 @@
 #define __STDC_CONSTANT_MACROS
 #include <stdint.h>
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif 
-
 #include "catena.h"
 #include "catena-helpers.h"
 #include "hash.h"
@@ -22,10 +18,17 @@
   #define TO_LITTLE_ENDIAN_32(n) (n)
 #endif
 
+/* Ensure that a pointer passed to the PHS interface stays const
+ */
+#ifdef OVERWRITE
+  #define MAYBECONST 
+#else
+  #define MAYBECONST const
+#endif
 
 /***************************************************/
 
-int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
+int __Catena(MAYBECONST uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t *salt,  const uint8_t  saltlen,
 	     const uint8_t *data,  const uint32_t datalen,
 	     const uint8_t lambda, const uint8_t  min_garlic,
@@ -57,6 +60,11 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
   /* Compute the initial value to hash  */
   __Hash5(hv, H_LEN, t, 4, x, H_LEN, pwd,  pwdlen, salt, saltlen, x);
 
+  /*Overwrite Password if enabled*/
+#ifdef OVERWRITE
+  erasepwd(pwd,pwdlen);
+#endif
+
   Flap(x, lambda, (min_garlic+1)/2, salt, saltlen, x);
 
   for(c=min_garlic; c <= garlic; c++)
@@ -78,7 +86,7 @@ int __Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 
 /***************************************************/
 
-int Catena(const uint8_t *pwd,   const uint32_t pwdlen,
+int Catena(uint8_t *pwd,   const uint32_t pwdlen,
 	   const uint8_t *salt,  const uint8_t  saltlen,
 	   const uint8_t *data,  const uint32_t datalen,
 	   const uint8_t lambda, const uint8_t  min_garlic,
@@ -94,7 +102,7 @@ int Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 /***************************************************/
 
 
-int Naive_Catena(const char *pwd,  const char *salt, const char *data,
+int Naive_Catena(char *pwd,  const char *salt, const char *data,
 		  uint8_t hash[H_LEN])
 {
   return __Catena( (uint8_t  *) pwd, strlen(pwd),
@@ -107,7 +115,7 @@ int Naive_Catena(const char *pwd,  const char *salt, const char *data,
 /***************************************************/
 
 
-int Simple_Catena(const uint8_t *pwd,   const uint32_t pwdlen,
+int Simple_Catena(uint8_t *pwd,   const uint32_t pwdlen,
 		  const uint8_t *salt,  const uint8_t  saltlen,
 		  const uint8_t *data,  const uint32_t datalen,
 		  uint8_t hash[H_LEN])
@@ -120,7 +128,7 @@ int Simple_Catena(const uint8_t *pwd,   const uint32_t pwdlen,
 
 /***************************************************/
 
-int Catena_Client(const uint8_t  *pwd,   const uint32_t pwdlen,
+int Catena_Client(uint8_t  *pwd,   const uint32_t pwdlen,
 		  const uint8_t  *salt,  const uint8_t  saltlen,
 		  const uint8_t  *data,  const uint32_t datalen,
 		  const uint8_t lambda, const uint8_t  min_garlic,
@@ -171,7 +179,7 @@ void CI_Update(const uint8_t *old_hash,  const uint8_t lambda,
 
 /***************************************************/
 
-void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
+void Catena_KG(uint8_t *pwd,   const uint32_t pwdlen,
 	       const uint8_t *salt,  const uint8_t saltlen,
 	       const uint8_t *data,  const uint32_t datalen,
 	       const uint8_t lambda, const uint8_t  min_garlic,
@@ -207,7 +215,7 @@ void Catena_KG(const uint8_t *pwd,   const uint32_t pwdlen,
 
 /***************************************************/
 
-void Catena_Keyed_Hashing(const uint8_t *pwd,   const uint32_t pwdlen,
+void Catena_Keyed_Hashing(uint8_t *pwd,   const uint32_t pwdlen,
 			  const uint8_t *salt,  const uint8_t saltlen,
 			  const uint8_t *data,  const uint32_t datalen,
 			  const uint8_t lambda, const uint8_t  min_garlic,
@@ -228,12 +236,13 @@ void Catena_Keyed_Hashing(const uint8_t *pwd,   const uint32_t pwdlen,
    for(i=0; i<hashlen; i++) chash[i] ^= keystream[i];
 }
 
+
 /***************************************************/
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int PHS(void *out, size_t outlen,  const void *in, size_t inlen,
 	   const void *salt, size_t saltlen, unsigned int t_cost,
 	   unsigned int m_cost) {
-  return __Catena((uint8_t * )in, inlen, salt, saltlen, (const uint8_t *)
+  return __Catena((const uint8_t * )in, inlen, salt, saltlen, (const uint8_t *)
 		  "", 0, t_cost, m_cost, m_cost, outlen, REGULAR,
 		  PASSWORD_HASHING_MODE, out);
 }
