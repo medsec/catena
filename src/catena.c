@@ -18,10 +18,17 @@
   #define TO_LITTLE_ENDIAN_32(n) (n)
 #endif
 
+/* Ensure that a pointer passed to the PHS interface stays const
+ */
+#ifdef OVERWRITE
+  #define MAYBECONST 
+#else
+  #define MAYBECONST const
+#endif
 
 /***************************************************/
 
-int __Catena(uint8_t *pwd,   const uint32_t pwdlen,
+int __Catena(MAYBECONST uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t *salt,  const uint8_t  saltlen,
 	     const uint8_t *data,  const uint32_t datalen,
 	     const uint8_t lambda, const uint8_t  min_garlic,
