@@ -20,8 +20,8 @@ int main()
   const uint8_t salt[SALT_LEN]=
     {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
      0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0XFF};
-  uint8_t* password = malloc(8);
-  strncpy((char*)password, "Password", 8);
+  uint8_t* password = malloc(9);
+  strncpy((char*)password, "Password", 9);
   const char *data     = "I'm a header";
   const uint8_t lambda = LAMBDA;
 #ifdef CATENA_INFO
