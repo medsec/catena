@@ -55,7 +55,7 @@ $(warning )
 endif
 
 
-.PHONY: all blake2b Butterfly Dragonfly
+.PHONY: all blake2b Butterfly Dragonfly clean
 
 all: blake2b
 

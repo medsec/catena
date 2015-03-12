@@ -32,7 +32,7 @@ int __Catena(MAYBECONST uint8_t *pwd,   const uint32_t pwdlen,
 	     const uint8_t *salt,  const uint8_t  saltlen,
 	     const uint8_t *data,  const uint32_t datalen,
 	     const uint8_t lambda, const uint8_t  min_garlic,
-	     const uint8_t garlic, const size_t  hashlen,
+	     const uint8_t garlic, const uint8_t  hashlen,
 	     const uint8_t client, const uint8_t  tweak_id, uint8_t *hash)
 {
   uint8_t x[H_LEN];
@@ -242,6 +242,11 @@ void Catena_Keyed_Hashing(uint8_t *pwd,   const uint32_t pwdlen,
 int PHS(void *out, size_t outlen,  const void *in, size_t inlen,
 	   const void *salt, size_t saltlen, unsigned int t_cost,
 	   unsigned int m_cost) {
+  //check range of parameters against the parameter types of __Catena
+  if((outlen > UINT8_MAX) || (inlen > UINT32_MAX) || (saltlen > UINT32_MAX) || 
+      (t_cost > UINT8_MAX) || (m_cost > UINT8_MAX)){
+    return 1;
+  }
   return __Catena((const uint8_t * )in, inlen, salt, saltlen, (const uint8_t *)
 		  "", 0, t_cost, m_cost, m_cost, outlen, REGULAR,
 		  PASSWORD_HASHING_MODE, out);
