@@ -74,6 +74,12 @@ void CI_Update(const uint8_t *old_hash,  const uint8_t lambda,
 	       const uint8_t old_garlic, const uint8_t new_garlic,
 	       const uint8_t hashlen, uint8_t *new_hash);
 
+/* Client independent update form an old, keyed hash */
+void CI_Keyed_Update(const uint8_t *old_hash,  const uint8_t lambda,
+			const uint8_t *salt,		const uint8_t saltlen,
+			const uint8_t old_garlic,	const uint8_t new_garlic,
+			const uint8_t hashlen,		const uint8_t *key,
+			const uint64_t uuid,		uint8_t *new_hash);
 
 /* Mode of operation that derives a key from a password */
 void Catena_KG(uint8_t *pwd,   const uint32_t pwdlen,

@@ -176,6 +176,44 @@ void CI_Update(const uint8_t *old_hash,  const uint8_t lambda,
   memcpy(new_hash,x,hashlen);
 }
 
+/***************************************************/
+
+void CI_Keyed_Update(const uint8_t *old_hash,  const uint8_t lambda,
+            const uint8_t *salt,      const uint8_t saltlen,
+            const uint8_t old_garlic, const uint8_t new_garlic,
+            const uint8_t hashlen,    const uint8_t *key,
+            const uint64_t uuid,      uint8_t *new_hash)
+{
+  uint8_t keystream[H_LEN];
+  uint64_t tmp = TO_LITTLE_ENDIAN_64(uuid);
+  uint8_t c;
+  uint8_t x[H_LEN];
+
+  memcpy(x, old_hash, hashlen);
+  memset(x+hashlen, 0, H_LEN-hashlen);
+
+  __Hash4(key, KEY_LEN,  (uint8_t*) &tmp, 8, &old_garlic, sizeof(uint8_t), key, 
+      KEY_LEN, keystream);
+
+  //decrypt the old hash
+  for(int i=0; i<hashlen; i++) x[i] ^= keystream[i];
+
+  for(c=old_garlic+1; c <= new_garlic; c++)
+  {
+      Flap(x, lambda, c, salt, saltlen, x);
+      __Hash2(&c,1,x, H_LEN, x);
+      memset(x+hashlen, 0, H_LEN-hashlen);
+  }
+
+  __Hash4(key, KEY_LEN,  (uint8_t*) &tmp, 8, &new_garlic, sizeof(uint8_t), key, 
+      KEY_LEN, keystream);
+
+  //encrypt the new hash
+  for(int i=0; i<hashlen; i++) x[i] ^= keystream[i];
+
+  memcpy(new_hash,x,hashlen);
+}
+
 
 /***************************************************/
 
@@ -231,7 +269,8 @@ void Catena_Keyed_Hashing(uint8_t *pwd,   const uint32_t pwdlen,
 	    lambda, min_garlic, garlic, hashlen,
 	    REGULAR, PASSWORD_HASHING_MODE, chash);
 
-   __Hash3(key, KEY_LEN,  (uint8_t*) &tmp, 8, key, KEY_LEN, keystream);
+   __Hash4(key, KEY_LEN,  (uint8_t*) &tmp, 8, &garlic, sizeof(uint8_t), key, 
+      KEY_LEN, keystream);
 
    for(i=0; i<hashlen; i++) chash[i] ^= keystream[i];
 }
