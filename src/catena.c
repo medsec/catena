@@ -41,7 +41,7 @@ int __Catena(MAYBECONST uint8_t *pwd,   const uint32_t pwdlen,
   uint8_t c;
 
   if((hashlen > H_LEN) || (garlic > 63) || (min_garlic > garlic) || 
-    (lambda == 0)){
+    (lambda == 0) || (garlic == 0)){
      return -1;
   }
 
