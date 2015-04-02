@@ -223,7 +223,7 @@ void __HashFast(int vindex, const uint8_t* i1,
   memcpy(hash, buffer, H_LEN );
 }
 
-void __ResetState(){
+void __ResetState(void){
   blake2b_init(&_state,H_LEN);
 }
 
@@ -236,5 +236,5 @@ void __HashFast(int vindex, const uint8_t* i1,
 }
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-void __ResetState(){}
+void __ResetState(void){}
 #endif
