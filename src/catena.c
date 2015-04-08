@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <byteswap.h>
-
+#include <endian.h>
 #include <stdlib.h>
 #include <sys/param.h>
 #define __STDC_CONSTANT_MACROS
