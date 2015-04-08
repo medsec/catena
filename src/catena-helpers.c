@@ -75,9 +75,19 @@ static int p;
 static uint64_t s[16];
 
 void initXSState(const uint8_t* a, const uint8_t* b){
-	p = 0;
-	memcpy(s, a, H_LEN);
-	memcpy(&s[8], b, H_LEN);
+  p = 0;
+  //endianess independet equivalent to
+  // memcpy(s, a, H_LEN);
+  // memcpy(&s[8], b, H_LEN);
+  //on little endian
+  for(int i = 0; i < 8; i++){
+    s[i] = UINT64_C(0);
+    s[i+8] = UINT64_C(0);
+    for(int j = 0; j < 8; j++){
+      s[i] |= ((uint64_t)a[i*8+j]) << j*8;
+      s[i+8] |= ((uint64_t)b[i*8+j]) << j*8;
+    }
+  }
 }
 
 uint64_t xorshift1024star() {

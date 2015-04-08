@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <byteswap.h>
+
 #include <stdlib.h>
 #include <sys/param.h>
 #define __STDC_CONSTANT_MACROS
@@ -10,10 +11,14 @@
 #include "catena-helpers.h"
 #include "hash.h"
 
-#ifdef ARC_BIG_ENDIAN
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+  #define TO_LITTLE_ENDIAN_64(n) (n)
+  #define TO_LITTLE_ENDIAN_32(n) (n)
+#elif __BYTE_ORDER == __BIG_ENDIAN
   #define TO_LITTLE_ENDIAN_64(n) bswap_64(n)
   #define TO_LITTLE_ENDIAN_32(n) bswap_32(n)
 #else
+  #warning "byte order couldn't be detected. This affects key generation and keyed hashing"
   #define TO_LITTLE_ENDIAN_64(n) (n)
   #define TO_LITTLE_ENDIAN_32(n) (n)
 #endif
