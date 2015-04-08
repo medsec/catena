@@ -25,6 +25,8 @@ inline void initmem(const uint8_t x[H_LEN], const uint64_t c, uint8_t *r)
   for(uint64_t i = 2; i < c; i++){
     __HashFast(i, r + (i-1)*H_LEN, r + (i-2)*H_LEN, r + i*H_LEN);
   }
+
+  free(tmp);
 }
 
 
