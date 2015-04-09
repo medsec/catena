@@ -1,4 +1,10 @@
 #include "catena.h"
+//Loading in blake2b is faster on little endian
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#ifndef NATIVE_LITTLE_ENDIAN
+  #define NATIVE_LITTLE_ENDIAN
+#endif
+#endif
 #include "blake2-ref/blake2.h"
 #include "hash.h"
 
@@ -223,7 +229,7 @@ void __HashFast(int vindex, const uint8_t* i1,
   memcpy(hash, buffer, H_LEN );
 }
 
-void __ResetState(){
+void __ResetState(void){
   blake2b_init(&_state,H_LEN);
 }
 
@@ -236,5 +242,5 @@ void __HashFast(int vindex, const uint8_t* i1,
 }
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-void __ResetState(){}
+void __ResetState(void){}
 #endif
