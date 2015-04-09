@@ -1,4 +1,10 @@
 #include "catena.h"
+//Loading in blake2b is faster on little endian
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#ifndef NATIVE_LITTLE_ENDIAN
+  #define NATIVE_LITTLE_ENDIAN
+#endif
+#endif
 #include "blake2-sse/blake2.h"
 #include "hash.h"
 
