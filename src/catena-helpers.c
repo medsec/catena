@@ -50,6 +50,9 @@ inline void gamma(const uint8_t garlic, const uint8_t *salt,
     //v_j1= H'(v_j1||v_j2)
     __HashFast(i, r + j * H_LEN, r + j2 * H_LEN, r + j * H_LEN); 
   }
+
+  free(tmp);
+  free(tmp2);
 }
 
 
@@ -85,6 +88,7 @@ void initXSState(const uint8_t* a, const uint8_t* b){
   for(int i = 0; i < 8; i++){
     s[i] = UINT64_C(0);
     s[i+8] = UINT64_C(0);
+
     for(int j = 0; j < 8; j++){
       s[i] |= ((uint64_t)a[i*8+j]) << j*8;
       s[i+8] |= ((uint64_t)b[i*8+j]) << j*8;
@@ -122,7 +126,9 @@ void
 #endif //end GCC >= 4.4
 
 #endif //end compiler_id
-erasepwd(uint8_t* pwd, const uint32_t pwdlen){
+
+erasepwd(uint8_t* pwd, const uint32_t pwdlen)
+{
   memset((char *)pwd, 0, pwdlen);
   free(pwd);
 }
