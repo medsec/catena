@@ -151,9 +151,37 @@ int Catena_Server(const uint8_t garlic,  const uint8_t x[H_LEN],
 {
   uint8_t z[H_LEN];
 
-  if (hashlen > H_LEN) return -1;
+  if (hashlen > H_LEN){
+    return -1;
+  }
+  
   __Hash2(&garlic,1,x, H_LEN, z);
-    memcpy(hash, z, hashlen);
+  memcpy(hash, z, hashlen);
+
+  return 0;
+}
+
+/***************************************************/
+
+int Catena_Keyed_Server(const uint8_t garlic, const uint8_t x[H_LEN],
+      const uint8_t *key,   const uint64_t uuid,
+      const uint8_t hashlen, uint8_t *chash)
+{
+  uint8_t z[H_LEN];
+  uint64_t tmp = TO_LITTLE_ENDIAN_64(uuid);
+  int i;
+
+  if (hashlen > H_LEN){
+    return -1;
+  }
+  /* finalize */
+  __Hash2(&garlic,1,x, H_LEN, z);
+  memcpy(chash, z, hashlen);
+
+  /* encrypt with z=keystream*/
+  __Hash4(key, KEY_LEN,  (uint8_t*) &tmp, 8, &garlic, sizeof(uint8_t), key, 
+      KEY_LEN, z);
+   for(i=0; i<hashlen; i++) chash[i] ^= z[i];
 
   return 0;
 }
