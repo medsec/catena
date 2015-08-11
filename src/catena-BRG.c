@@ -6,7 +6,11 @@
 #include "catena-helpers.h"
 
 // Default values for Catena-Dragonfly
-const uint8_t VERSION_ID[] = "Dragonfly";
+#ifdef FAST
+  const uint8_t VERSION_ID[] = "Dragonfly";
+#else
+  const uint8_t VERSION_ID[] = "Dragonfly-Full";
+#endif
 const uint8_t LAMBDA = 2;
 const uint8_t GARLIC = 21;
 const uint8_t MIN_GARLIC = 21;

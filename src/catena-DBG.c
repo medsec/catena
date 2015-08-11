@@ -6,7 +6,11 @@
 #include "catena-helpers.h"
 
 // Default values for Catena-Butterfly
-const uint8_t VERSION_ID[] = "Butterfly";
+#ifdef FAST
+  const uint8_t VERSION_ID[] = "Butterfly";
+#else
+  const uint8_t VERSION_ID[] = "Butterfly-Full";
+#endif
 const uint8_t LAMBDA = 4;
 const uint8_t GARLIC = 16;
 const uint8_t MIN_GARLIC = 16;
