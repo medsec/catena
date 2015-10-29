@@ -22,6 +22,13 @@ inline void gamma(const uint8_t garlic, const uint8_t *salt,
 */
 void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output);
 
+/*Added for flexibility in catena-variants, sets first node H(0|X) and second node H(1|X)
+*/
+void H_INIT(const uint8_t* x, const uint16_t xlen,  uint8_t *vm1, uint8_t *vm2);
+
+/*Added for flexibility in catena-variants, uses hashfull instead of hashfast for first node in current layer
+*/
+void H_First(const uint8_t* i1, const uint8_t* i2, uint8_t* hash);
 
 /* Init the state for Xorshift with two 512bit values
  */

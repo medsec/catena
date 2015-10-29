@@ -14,20 +14,20 @@ const uint8_t ZERO8[H_LEN] = {0}; //H_LEN 0s
 
 inline void initmem(const uint8_t x[H_LEN], const uint64_t c, uint8_t *r)
 {
-  uint8_t *tmp = malloc(H_LEN);
-
-  memcpy(tmp, x, H_LEN);
-  tmp[H_LEN-1] ^= 1;
-  __Hash2(x, H_LEN, tmp, H_LEN, r); //v_0 <- H(x||xXOR1)
-  __ResetState();
-
-  __HashFast(1, r, x, r+H_LEN); //v_1 <- H'(v_0||x)
+  uint8_t *vm2 = (uint8_t*) malloc(H_LEN);
+  uint8_t *vm1 = (uint8_t*) malloc(H_LEN);
+  H_INIT(x, H_LEN, vm1, vm2);
   
+  __ResetState();
+  __HashFast(0, vm1, vm2, r);
+  __HashFast(1, r, vm1, r+H_LEN);
+
+  /* Top row */
   for(uint64_t i = 2; i < c; i++){
     __HashFast(i, r + (i-1)*H_LEN, r + (i-2)*H_LEN, r + i*H_LEN);
   }
-
-  free(tmp);
+  free(vm2);
+  free(vm1);
 }
 
 
@@ -75,6 +75,26 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
 #endif
 }
 
+void H_INIT(const uint8_t* x, const uint16_t xlen,  uint8_t *vm1, uint8_t *vm2){
+  const uint8_t l = 2;
+  uint8_t *tmp = (uint8_t*) malloc(l*H_LEN);
+
+  for(uint8_t i=0; i!=l;++i){
+    __Hash2(&i, 1, x, xlen, tmp+i*H_LEN);
+  }
+  memcpy(vm1, tmp, H_LEN);
+  memcpy(vm2, tmp+(l/2*H_LEN), H_LEN);
+  free(tmp);
+}
+
+void H_First(const uint8_t* i1, const uint8_t* i2, uint8_t* hash){
+  __ResetState();
+  uint8_t *x = (uint8_t*) malloc(H_LEN);
+  __Hash2(i1, H_LEN, i2, H_LEN,x);
+  uint8_t i = 0;
+  __Hash2(&i,1, x, H_LEN, hash);
+  free(x);
+}
 
 //see: http://en.wikipedia.org/wiki/Xorshift#Variations
 static int p;
@@ -98,12 +118,12 @@ void initXSState(const uint8_t* a, const uint8_t* b){
 }
 
 uint64_t xorshift1024star() {
-	uint64_t s0 = s[ p ];
-	uint64_t s1 = s[ p = (p+1) & 15 ];
-	s1 ^= s1 << 31; // a
-	s1 ^= s1 >> 11; // b
-	s0 ^= s0 >> 30; // c
-	return ( s[p] = s0 ^ s1 ) * UINT64_C(1181783497276652981);
+  uint64_t s0 = s[ p ];
+  uint64_t s1 = s[ p = (p+1) & 15 ];
+  s1 ^= s1 << 31; // a
+  s1 ^= s1 >> 11; // b
+  s0 ^= s0 >> 30; // c
+  return ( s[p] = s0 ^ s1 ) * UINT64_C(1181783497276652981);
 }
 
 
