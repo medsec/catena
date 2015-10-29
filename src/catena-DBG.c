@@ -80,8 +80,9 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
       XOR(r + idx(i-1,c-1,co,c,m)*H_LEN, r + idx(i-1,0,co,c,m)*H_LEN, tmp);
 
       //r0 := H(tmp || vsigma(g,i-1,0) )
-      __Hash2(tmp, H_LEN, r+idx(i-1,sigma(garlic,i-1,0),co,c,m) * H_LEN, H_LEN,
-         r+idx(i,0,co,c,m) *H_LEN);
+      // __Hash2(tmp, H_LEN, r+idx(i-1,sigma(garlic,i-1,0),co,c,m) * H_LEN, H_LEN,
+      //    r+idx(i,0,co,c,m) *H_LEN);
+      H_First(tmp, r+idx(i-1,sigma(garlic,i-1,0),co,c,m) * H_LEN, r+idx(i,0,co,c,m) *H_LEN);
       __ResetState();
 
       //vertices
