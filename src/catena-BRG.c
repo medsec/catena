@@ -28,17 +28,6 @@ uint64_t reverse(uint64_t x, const uint8_t n)
   return x >> (64 - n);
 }
 
-void H_First(const uint8_t* i1, const uint8_t* i2, uint8_t* hash){
-  __ResetState();
-  uint8_t *x = (uint8_t*) malloc(H_LEN);
-  __Hash2(i1, H_LEN, i2, H_LEN,x);
-
-  for(uint8_t i = 0; i<(H_LEN/H_LEN);++i){
-    __Hash2(&i,1, x, H_LEN, hash+i*H_LEN);
-  }
-  free(x);
-}
-
 
 /* This function computes the  \lambda-BRH of x. */
 void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,

@@ -50,7 +50,6 @@ uint64_t idx(uint64_t i, uint64_t j, uint8_t co, uint64_t c, uint64_t m){
 }
 
 
-
 /* Computes the hash of x using a Double Butterfly Graph,
 * that forms as (2^g,\lamba)-Superconcentrator
 */
