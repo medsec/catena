@@ -76,7 +76,7 @@ void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output)
 }
 
 void H_INIT(const uint8_t* x, const uint16_t xlen,  uint8_t *vm1, uint8_t *vm2){
-  const uint8_t l = 2* H_LEN/H_LEN;
+  const uint8_t l = 2;
   uint8_t *tmp = (uint8_t*) malloc(l*H_LEN);
 
   for(uint8_t i=0; i!=l;++i){
@@ -91,10 +91,8 @@ void H_First(const uint8_t* i1, const uint8_t* i2, uint8_t* hash){
   __ResetState();
   uint8_t *x = (uint8_t*) malloc(H_LEN);
   __Hash2(i1, H_LEN, i2, H_LEN,x);
-
-  for(uint8_t i = 0; i<(H_LEN/H_LEN);++i){
-    __Hash2(&i,1, x, H_LEN, hash+i*H_LEN);
-  }
+  uint8_t i = 0;
+  __Hash2(&i,1, x, H_LEN, hash);
   free(x);
 }
 
