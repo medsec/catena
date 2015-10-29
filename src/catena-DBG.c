@@ -16,8 +16,8 @@ const uint8_t GARLIC = 16;
 const uint8_t MIN_GARLIC = 16;
 
 /*  Sigma function that defines the diagonal connections of a DBG
-*	diagonal front: flip the (g-i)th bit (Inverse Buttferly Graph)
-*	diagonal back: flip the i-(g-1)th bit (Regular Butterfly Graph)
+* diagonal front: flip the (g-i)th bit (Inverse Buttferly Graph)
+* diagonal back: flip the i-(g-1)th bit (Regular Butterfly Graph)
 */
 uint64_t sigma(const uint8_t g, const uint64_t i, const uint64_t j)
 {
@@ -50,6 +50,7 @@ uint64_t idx(uint64_t i, uint64_t j, uint8_t co, uint64_t c, uint64_t m){
 }
 
 
+
 /* Computes the hash of x using a Double Butterfly Graph,
 * that forms as (2^g,\lamba)-Superconcentrator
 */
@@ -66,10 +67,9 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   uint8_t k;
   uint8_t co = 0; //carry over from last iteration
 
-
   /* Top row */
   initmem(x, c, r);
-
+  
   /*Gamma Function*/
   gamma(garlic, salt, saltlen, r);
 
@@ -82,7 +82,7 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
 
       //r0 := H(tmp || vsigma(g,i-1,0) )
       __Hash2(tmp, H_LEN, r+idx(i-1,sigma(garlic,i-1,0),co,c,m) * H_LEN, H_LEN,
-	       r+idx(i,0,co,c,m) *H_LEN);
+         r+idx(i,0,co,c,m) *H_LEN);
       __ResetState();
 
       //vertices
@@ -91,7 +91,7 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
         XOR(r + idx(i,j-1,co,c,m)*H_LEN, r + idx(i-1,j,co,c,m) * H_LEN, tmp);
         //rj := H(tmp || vsigma(g,i-1,j))
         __HashFast(j, tmp, r + idx(i-1,sigma(garlic,i-1,j),co,c,m) * H_LEN,
-		        r + idx(i,j,co,c,m) * H_LEN);
+            r + idx(i,j,co,c,m) * H_LEN);
       }
     }
     co = (co + (i-1)) % 3;

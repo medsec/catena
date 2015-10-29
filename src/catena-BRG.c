@@ -28,24 +28,41 @@ uint64_t reverse(uint64_t x, const uint8_t n)
   return x >> (64 - n);
 }
 
+void H_First(const uint8_t* i1, const uint8_t* i2, uint8_t* hash){
+  __ResetState();
+  uint8_t *x = (uint8_t*) malloc(H_LEN);
+  __Hash2(i1, H_LEN, i2, H_LEN,x);
+
+  for(uint8_t i = 0; i<(H_LEN/H_LEN);++i){
+    __Hash2(&i,1, x, H_LEN, hash+i*H_LEN);
+  }
+  free(x);
+}
+
+
 /* This function computes the  \lambda-BRH of x. */
 void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
   const uint8_t *salt, const uint8_t saltlen, uint8_t h[H_LEN])
 {
   const uint64_t c = UINT64_C(1) << garlic;
+  
+  /* allocate memory for all further steps */
   uint8_t *r = malloc(c*H_LEN);
   uint64_t i;
   uint8_t k;
 
-  /* Top row */
+  // /* Top row */
   initmem(x, c, r);
 
+  
   /*Gamma Function*/
   gamma(garlic, salt, saltlen, r);
+  
 
   /* BRH */
   for (k = 0; k < lambda; k++) {
-    __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    // __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    H_First(r + (c-1)*H_LEN, r, r);
     __ResetState();
 
     /* Replace r[reverse(i, garlic)] with new value */
@@ -60,7 +77,8 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
       break;
     }
     /* This is now sequential because (reverse(reverse(i, garlic), garlic) == i) */
-    __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    // __Hash2(r + (c-1)*H_LEN, H_LEN, r, H_LEN, r);
+    H_First(r + (c-1)*H_LEN, r, r);
     __ResetState();
     p = r + H_LEN;
     for (i = 1; i < c; i++, p += H_LEN) {
@@ -70,5 +88,8 @@ void Flap(const uint8_t x[H_LEN], const uint8_t lambda, const uint8_t garlic,
 
   /* reverse(c - 1, garlic) == c - 1 */
   memcpy(h, r + (c - 1) * H_LEN, H_LEN);
+
+  
+
   free(r);
 }

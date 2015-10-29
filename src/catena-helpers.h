@@ -22,6 +22,7 @@ inline void gamma(const uint8_t garlic, const uint8_t *salt,
 */
 void XOR(const uint8_t *input1, const uint8_t *input2, uint8_t *output);
 
+void H_INIT(const uint8_t* x, const uint16_t xlen,  uint8_t *vm1, uint8_t *vm2);
 
 /* Init the state for Xorshift with two 512bit values
  */
