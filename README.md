@@ -1,5 +1,7 @@
 Catena
 ======
+**This implementation is outdated and does not comply with the current specification of Catena**
+
 Catena is a memory-consuming password scrambler that excellently
 thwarts massively parallel attacks on cheap memory-constrained
 hardware, such as recent graphical processing units (GPUs).
